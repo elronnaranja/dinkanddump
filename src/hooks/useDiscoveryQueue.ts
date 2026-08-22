@@ -56,7 +56,7 @@ export function useDiscoveryQueue(
       setError(null);
 
       try {
-        const rows = await fetchDiscoveryCandidates(userId, filters);
+        const rows = await fetchDiscoveryCandidates(filters);
         const freshRows = rows.filter((row) => !seenIdsRef.current.has(row.id));
 
         const [publicProfiles, photoUrls] = await Promise.all([

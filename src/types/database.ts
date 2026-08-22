@@ -299,7 +299,6 @@ export interface Database {
       };
       get_discovery_candidates: {
         Args: {
-          p_user_id: string;
           p_max_distance_km: number;
           p_skill_min: string;
           p_skill_max: string;
