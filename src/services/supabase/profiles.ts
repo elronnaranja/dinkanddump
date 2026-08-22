@@ -135,6 +135,31 @@ export async function insertProfilePhoto(
   return data;
 }
 
+/**
+ * Batch-fetches each user's primary (position 0) photo storage path — the
+ * same "primary photo" convention get_discovery_candidates uses (lowest
+ * position). Used by useMatches to render match-list thumbnails without a
+ * per-match round trip. Users with no photos simply have no entry in the
+ * returned map.
+ */
+export async function listPrimaryPhotoPaths(userIds: string[]): Promise<Record<string, string>> {
+  if (userIds.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("profile_photos")
+    .select("user_id, storage_path")
+    .eq("position", 0)
+    .in("user_id", userIds);
+
+  if (error) throw error;
+
+  const result: Record<string, string> = {};
+  for (const row of data ?? []) {
+    result[row.user_id] = row.storage_path;
+  }
+  return result;
+}
+
 export async function deleteProfilePhoto(photoId: string): Promise<void> {
   const { error } = await supabase.from("profile_photos").delete().eq("id", photoId);
   if (error) throw error;

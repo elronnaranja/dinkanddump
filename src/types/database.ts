@@ -176,6 +176,13 @@ export interface RecordSwipeResult {
   match_id: string | null;
 }
 
+/** Return row shape of the `get_match_distances` RPC (migration 0013). */
+export interface MatchDistanceRow {
+  match_id: string;
+  other_user_id: string;
+  distance_km: number | null;
+}
+
 type Nullable<T, K extends keyof T> = Omit<T, K> & { [P in K]?: T[P] };
 
 export interface Database {
@@ -301,6 +308,10 @@ export interface Database {
           p_limit: number;
         };
         Returns: DiscoveryCandidateRow[];
+      };
+      get_match_distances: {
+        Args: Record<string, never>;
+        Returns: MatchDistanceRow[];
       };
     };
   };

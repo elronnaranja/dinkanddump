@@ -1,5 +1,5 @@
 import { supabase } from "./client";
-import type { ConversationRow, MatchRow } from "../../types/database";
+import type { ConversationRow, MatchDistanceRow, MatchRow } from "../../types/database";
 
 export async function listMatchesForUser(userId: string): Promise<MatchRow[]> {
   const { data, error } = await supabase
@@ -58,4 +58,58 @@ export async function getConversationForMatch(matchId: string): Promise<Conversa
 
   if (error) throw error;
   return data;
+}
+
+/**
+ * Reverse lookup of getConversationForMatch — resolves a conversation by
+ * its own id. The chat screen only has a conversationId (route param), so
+ * this is how it walks back to the underlying match (see useChatHeader).
+ */
+export async function getConversationById(conversationId: string): Promise<ConversationRow | null> {
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("*")
+    .eq("id", conversationId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Batch version of getConversationForMatch — one round trip for the whole
+ * Matches list instead of one per match. Relies on the same
+ * conversations_select_member RLS policy, so only conversations the caller
+ * belongs to come back (which, since matchIds should already be the
+ * caller's own matches, is all of them).
+ */
+export async function listConversationsForMatches(matchIds: string[]): Promise<ConversationRow[]> {
+  if (matchIds.length === 0) return [];
+
+  const { data, error } = await supabase.from("conversations").select("*").in("match_id", matchIds);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+/**
+ * Calls the get_match_distances RPC (migration 0013) and reshapes it into
+ * a match_id -> distance_km map for easy lookup while building the Matches
+ * list. See that migration for why this can't just be read off `profiles`
+ * directly. The RPC takes no arguments — it always scopes to the calling
+ * user via auth.uid() server-side, so there's no client-suppliable user id
+ * to pass (or trust).
+ */
+export async function fetchMatchDistances(): Promise<Record<string, number>> {
+  const { data, error } = await supabase.rpc("get_match_distances");
+
+  if (error) throw error;
+
+  const result: Record<string, number> = {};
+  for (const row of (data ?? []) as MatchDistanceRow[]) {
+    if (row.distance_km != null) {
+      result[row.match_id] = row.distance_km;
+    }
+  }
+  return result;
 }

@@ -9,6 +9,7 @@ import type {
   DominantHand,
   GamePreference,
   MatchStatus,
+  MessageRow,
   PlayingFrequency,
   PlayPreference,
   PublicProfileRow,
@@ -105,17 +106,24 @@ export interface MatchResult {
   matchId: string | null;
 }
 
-export interface MatchSummary {
-  id: string;
+/**
+ * View-model for a single row on the Matches (and, filtered, Messages)
+ * screens. Composed in useMatches from several sources: matches +
+ * conversations + public_profiles + primary photo + latest message per
+ * conversation (see src/hooks/useMatches.ts for how these are combined) —
+ * there's no single table/view this maps 1:1 from.
+ */
+export interface MatchListItem {
+  id: string; // match id
+  conversationId: string | null;
   otherUserId: string;
+  otherFirstName: string;
+  otherAge: number | null;
+  otherPhotoUrl: string | null;
+  skillLevel: SkillLevel | null;
+  distanceKm: number | null;
   status: MatchStatus;
   matchedAt: string;
-}
-
-export interface ConversationSummary {
-  id: string;
-  matchId: string;
-  otherUserId: string;
   lastMessagePreview: string | null;
   lastMessageAt: string | null;
   unreadCount: number;
@@ -128,4 +136,15 @@ export interface ChatMessage {
   content: string;
   createdAt: string;
   readAt: string | null;
+}
+
+export function mapMessageRowToChatMessage(row: MessageRow): ChatMessage {
+  return {
+    id: row.id,
+    conversationId: row.conversation_id,
+    senderId: row.sender_id,
+    content: row.content,
+    createdAt: row.created_at,
+    readAt: row.read_at,
+  };
 }
