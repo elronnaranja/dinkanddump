@@ -22,6 +22,7 @@ import {
   PLAY_PREFERENCE_OPTIONS,
   DOMINANT_HAND_OPTIONS,
   PLAYING_FREQUENCY_OPTIONS,
+  YEARS_PLAYING_OPTIONS,
   GENDER_OPTIONS,
 } from "../../../src/constants/pickleballOptions";
 import type {
@@ -31,6 +32,7 @@ import type {
   PlayPreference,
   PlayingFrequency,
   SkillLevel,
+  YearsPlaying,
 } from "../../../src/types/database";
 
 export default function EditProfileScreen() {
@@ -55,8 +57,8 @@ export default function EditProfileScreen() {
   const [gamePreference, setGamePreference] = useState<GamePreference>("both");
   const [playPreference, setPlayPreference] = useState<PlayPreference>("both");
   const [dominantHand, setDominantHand] = useState<DominantHand>("right");
-  const [playingFrequency, setPlayingFrequency] = useState<PlayingFrequency>("weekly");
-  const [yearsPlaying, setYearsPlaying] = useState("0");
+  const [playingFrequency, setPlayingFrequency] = useState<PlayingFrequency>("once_per_week");
+  const [yearsPlaying, setYearsPlaying] = useState<YearsPlaying | null>(null);
   const [favoriteShot, setFavoriteShot] = useState("");
   const [playStyle, setPlayStyle] = useState("");
   const [duprRating, setDuprRating] = useState("");
@@ -82,7 +84,7 @@ export default function EditProfileScreen() {
     setPlayPreference(profile.play_preference);
     setDominantHand(profile.dominant_hand);
     setPlayingFrequency(profile.playing_frequency);
-    setYearsPlaying(String(profile.years_playing));
+    setYearsPlaying(profile.years_playing);
     setFavoriteShot(profile.favorite_shot ?? "");
     setPlayStyle(profile.play_style ?? "");
     setDuprRating(profile.dupr_rating != null ? String(profile.dupr_rating) : "");
@@ -130,19 +132,16 @@ export default function EditProfileScreen() {
     }
   }
 
-  const yearsPlayingNumber = Number(yearsPlaying);
   const duprNumber = duprRating.trim() ? Number(duprRating) : null;
   const canSave =
     !!userId &&
     firstName.trim().length > 0 &&
     usernameStatus !== "taken" &&
-    Number.isFinite(yearsPlayingNumber) &&
-    yearsPlayingNumber >= 0 &&
-    yearsPlayingNumber <= 100 &&
+    !!yearsPlaying &&
     (duprNumber === null || (Number.isFinite(duprNumber) && duprNumber >= 0 && duprNumber <= 8));
 
   async function handleSave() {
-    if (!userId) return;
+    if (!userId || !yearsPlaying) return;
     setSaving(true);
     setSaveError(null);
     setSaved(false);
@@ -163,7 +162,7 @@ export default function EditProfileScreen() {
         play_preference: playPreference,
         dominant_hand: dominantHand,
         playing_frequency: playingFrequency,
-        years_playing: yearsPlayingNumber,
+        years_playing: yearsPlaying,
         favorite_shot: favoriteShot || null,
         play_style: playStyle || null,
       });
@@ -284,11 +283,11 @@ export default function EditProfileScreen() {
         columns={2}
       />
       <Text style={styles.label}>Years playing</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="number-pad"
+      <SegmentedChoice
+        options={YEARS_PLAYING_OPTIONS}
         value={yearsPlaying}
-        onChangeText={(v) => setYearsPlaying(v.replace(/[^0-9]/g, ""))}
+        onChange={setYearsPlaying}
+        columns={2}
       />
       <Text style={styles.label}>DUPR rating (optional, self-entered/unverified)</Text>
       <TextInput

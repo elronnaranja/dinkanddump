@@ -6,24 +6,24 @@ import type {
   PlayPreference,
   PlayingFrequency,
   SkillLevel,
+  YearsPlaying,
 } from "../types/database";
 
 // All value lists below mirror the enums defined in
-// supabase/migrations/0002_profiles.sql exactly — do not add/remove values
-// here without a corresponding migration.
+// supabase/migrations/0002_profiles.sql, as corrected by migration 0015 to
+// match the product spec's exact wording/buckets — do not add/remove
+// values here without a corresponding migration.
 
 export const SKILL_LEVEL_OPTIONS: ChoiceOption<SkillLevel>[] = [
-  "1.0",
-  "1.5",
-  "2.0",
-  "2.5",
-  "3.0",
-  "3.5",
-  "4.0",
-  "4.5",
-  "5.0",
-  "5.5+",
-].map((v) => ({ value: v as SkillLevel, label: v }));
+  { value: "beginner", label: "Beginner" },
+  { value: "2.0", label: "2.0" },
+  { value: "2.5", label: "2.5" },
+  { value: "3.0", label: "3.0" },
+  { value: "3.5", label: "3.5" },
+  { value: "4.0", label: "4.0" },
+  { value: "4.5", label: "4.5" },
+  { value: "5.0+", label: "5.0+" },
+];
 
 export const GAME_PREFERENCE_OPTIONS: ChoiceOption<GamePreference>[] = [
   { value: "singles", label: "Singles" },
@@ -33,7 +33,7 @@ export const GAME_PREFERENCE_OPTIONS: ChoiceOption<GamePreference>[] = [
 
 export const PLAY_PREFERENCE_OPTIONS: ChoiceOption<PlayPreference>[] = [
   { value: "competitive", label: "Competitive" },
-  { value: "social", label: "Social" },
+  { value: "casual", label: "Casual" },
   { value: "both", label: "Both" },
 ];
 
@@ -44,10 +44,17 @@ export const DOMINANT_HAND_OPTIONS: ChoiceOption<DominantHand>[] = [
 ];
 
 export const PLAYING_FREQUENCY_OPTIONS: ChoiceOption<PlayingFrequency>[] = [
-  { value: "rarely", label: "Rarely" },
-  { value: "weekly", label: "Weekly" },
-  { value: "few_times_week", label: "Few times a week" },
-  { value: "daily", label: "Daily" },
+  { value: "occasionally", label: "Occasionally" },
+  { value: "once_per_week", label: "1x per week" },
+  { value: "two_to_three_per_week", label: "2 to 3x per week" },
+  { value: "four_plus_per_week", label: "4+ times per week" },
+];
+
+export const YEARS_PLAYING_OPTIONS: ChoiceOption<YearsPlaying>[] = [
+  { value: "less_than_1", label: "Less than 1 year" },
+  { value: "one_to_two", label: "1 to 2 years" },
+  { value: "three_to_five", label: "3 to 5 years" },
+  { value: "five_plus", label: "5+ years" },
 ];
 
 export const GENDER_OPTIONS: ChoiceOption<Gender>[] = [
@@ -59,7 +66,7 @@ export const GENDER_OPTIONS: ChoiceOption<Gender>[] = [
 ];
 
 export function skillLevelLabel(level: SkillLevel): string {
-  return level;
+  return SKILL_LEVEL_OPTIONS.find((o) => o.value === level)?.label ?? level;
 }
 
 export function gamePreferenceLabel(pref: GamePreference): string {
@@ -76,4 +83,8 @@ export function dominantHandLabel(hand: DominantHand): string {
 
 export function playingFrequencyLabel(freq: PlayingFrequency): string {
   return PLAYING_FREQUENCY_OPTIONS.find((o) => o.value === freq)?.label ?? freq;
+}
+
+export function yearsPlayingLabel(years: YearsPlaying): string {
+  return YEARS_PLAYING_OPTIONS.find((o) => o.value === years)?.label ?? years;
 }

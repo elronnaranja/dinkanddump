@@ -10,6 +10,7 @@ import {
   PLAY_PREFERENCE_OPTIONS,
   DOMINANT_HAND_OPTIONS,
   PLAYING_FREQUENCY_OPTIONS,
+  YEARS_PLAYING_OPTIONS,
 } from "../../src/constants/pickleballOptions";
 import { useOnboarding } from "../../src/context/OnboardingContext";
 import { useAuthSession } from "../../src/services/supabase/auth";
@@ -22,19 +23,15 @@ export default function PickleballProfileScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const yearsPlayingNumber = Number(state.yearsPlaying);
   const duprNumber = state.duprRating.trim() ? Number(state.duprRating) : null;
 
   const canContinue =
     !!state.skillLevel &&
-    state.yearsPlaying.trim().length > 0 &&
-    Number.isFinite(yearsPlayingNumber) &&
-    yearsPlayingNumber >= 0 &&
-    yearsPlayingNumber <= 100 &&
+    !!state.yearsPlaying &&
     (duprNumber === null || (Number.isFinite(duprNumber) && duprNumber >= 0 && duprNumber <= 8));
 
   async function handleNext() {
-    if (!session || !state.skillLevel || !state.dateOfBirth) {
+    if (!session || !state.skillLevel || !state.dateOfBirth || !state.yearsPlaying) {
       setError("Missing required info from earlier steps. Please go back and check.");
       return;
     }
@@ -60,7 +57,7 @@ export default function PickleballProfileScreen() {
         play_preference: state.playPreference,
         dominant_hand: state.dominantHand,
         playing_frequency: state.playingFrequency,
-        years_playing: yearsPlayingNumber,
+        years_playing: state.yearsPlaying,
         favorite_shot: state.favoriteShot || null,
         play_style: state.playStyle || null,
         onboarding_completed: false,
@@ -120,12 +117,11 @@ export default function PickleballProfileScreen() {
       />
 
       <Text style={styles.label}>Years playing</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="e.g. 2"
-        keyboardType="number-pad"
+      <SegmentedChoice
+        options={YEARS_PLAYING_OPTIONS}
         value={state.yearsPlaying}
-        onChangeText={(v) => update({ yearsPlaying: v.replace(/[^0-9]/g, "") })}
+        onChange={(v) => update({ yearsPlaying: v })}
+        columns={2}
       />
 
       <Text style={styles.label}>DUPR rating (optional)</Text>

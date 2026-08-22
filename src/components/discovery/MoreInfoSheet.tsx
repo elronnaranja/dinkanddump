@@ -5,6 +5,8 @@ import {
   gamePreferenceLabel,
   playPreferenceLabel,
   playingFrequencyLabel,
+  skillLevelLabel,
+  yearsPlayingLabel,
 } from "../../constants/pickleballOptions";
 
 interface MoreInfoSheetProps {
@@ -45,7 +47,7 @@ export function MoreInfoSheet({ visible, candidate, onClose }: MoreInfoSheetProp
 
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Pickleball</Text>
-            <InfoRow label="Skill level" value={candidate.skillLevel} />
+            <InfoRow label="Skill level" value={skillLevelLabel(candidate.skillLevel)} />
             {candidate.duprRating != null && (
               <InfoRow
                 label="DUPR rating"
@@ -65,7 +67,7 @@ export function MoreInfoSheet({ visible, candidate, onClose }: MoreInfoSheetProp
               <InfoRow label="Plays" value={playingFrequencyLabel(candidate.playingFrequency)} />
             )}
             {candidate.yearsPlaying != null && (
-              <InfoRow label="Years playing" value={String(candidate.yearsPlaying)} />
+              <InfoRow label="Years playing" value={yearsPlayingLabel(candidate.yearsPlaying)} />
             )}
             {candidate.favoriteShot ? (
               <InfoRow label="Favorite shot" value={candidate.favoriteShot} />

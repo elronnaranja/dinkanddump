@@ -19,6 +19,8 @@ import {
   gamePreferenceLabel,
   playPreferenceLabel,
   playingFrequencyLabel,
+  skillLevelLabel,
+  yearsPlayingLabel,
 } from "../../../src/constants/pickleballOptions";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -126,7 +128,7 @@ export default function ProfileScreen() {
 
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>Pickleball</Text>
-        <InfoRow label="Skill level" value={profile.skill_level} />
+        <InfoRow label="Skill level" value={skillLevelLabel(profile.skill_level)} />
         {profile.dupr_rating != null && (
           <InfoRow
             label="DUPR rating"
@@ -137,7 +139,7 @@ export default function ProfileScreen() {
         <InfoRow label="Style" value={playPreferenceLabel(profile.play_preference)} />
         <InfoRow label="Dominant hand" value={dominantHandLabel(profile.dominant_hand)} />
         <InfoRow label="Plays" value={playingFrequencyLabel(profile.playing_frequency)} />
-        <InfoRow label="Years playing" value={String(profile.years_playing)} />
+        <InfoRow label="Years playing" value={yearsPlayingLabel(profile.years_playing)} />
         {profile.favorite_shot ? (
           <InfoRow label="Favorite shot" value={profile.favorite_shot} />
         ) : null}

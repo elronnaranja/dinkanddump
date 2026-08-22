@@ -14,6 +14,7 @@ import type {
   PlayPreference,
   PublicProfileRow,
   SkillLevel,
+  YearsPlaying,
 } from "./database";
 
 export interface DiscoveryCandidate {
@@ -35,7 +36,7 @@ export interface DiscoveryCandidate {
   duprRating: number | null;
   playStyle: string | null;
   playingFrequency: PlayingFrequency | null;
-  yearsPlaying: number | null;
+  yearsPlaying: YearsPlaying | null;
   favoriteShot: string | null;
   dominantHand: DominantHand | null;
 }

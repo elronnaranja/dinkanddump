@@ -15,8 +15,8 @@ const LOW_WATER_MARK = 4;
 // yet — see src/services/discoveryPreferences.ts.
 export const DEFAULT_DISCOVERY_FILTERS: DiscoveryFilters = {
   maxDistanceKm: 50,
-  skillMin: "1.0",
-  skillMax: "5.5+",
+  skillMin: "beginner",
+  skillMax: "5.0+",
   gamePreference: null,
   playPreference: null,
   limit: 20,

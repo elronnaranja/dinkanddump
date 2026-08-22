@@ -6,6 +6,7 @@ import type {
   PlayPreference,
   PlayingFrequency,
   SkillLevel,
+  YearsPlaying,
 } from "../types/database";
 
 /**
@@ -35,7 +36,7 @@ export interface OnboardingState {
   playPreference: PlayPreference;
   dominantHand: DominantHand;
   playingFrequency: PlayingFrequency;
-  yearsPlaying: string; // kept as string for the input, parsed on submit
+  yearsPlaying: YearsPlaying | null;
   favoriteShot: string;
   playStyle: string;
   duprRating: string; // kept as string for the input, parsed on submit
@@ -57,8 +58,8 @@ const initialState: OnboardingState = {
   gamePreference: "both",
   playPreference: "both",
   dominantHand: "right",
-  playingFrequency: "weekly",
-  yearsPlaying: "",
+  playingFrequency: "once_per_week",
+  yearsPlaying: null,
   favoriteShot: "",
   playStyle: "",
   duprRating: "",

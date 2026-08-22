@@ -6,21 +6,24 @@
  */
 
 export type SkillLevel =
-  | "1.0"
-  | "1.5"
+  | "beginner"
   | "2.0"
   | "2.5"
   | "3.0"
   | "3.5"
   | "4.0"
   | "4.5"
-  | "5.0"
-  | "5.5+";
+  | "5.0+";
 
 export type GamePreference = "singles" | "doubles" | "both";
-export type PlayPreference = "competitive" | "social" | "both";
+export type PlayPreference = "competitive" | "casual" | "both";
 export type DominantHand = "right" | "left" | "ambidextrous";
-export type PlayingFrequency = "rarely" | "weekly" | "few_times_week" | "daily";
+export type PlayingFrequency =
+  | "occasionally"
+  | "once_per_week"
+  | "two_to_three_per_week"
+  | "four_plus_per_week";
+export type YearsPlaying = "less_than_1" | "one_to_two" | "three_to_five" | "five_plus";
 export type Gender = "male" | "female" | "non_binary" | "other" | "prefer_not_to_say";
 
 export type VideoStatus = "processing" | "active" | "failed";
@@ -50,7 +53,7 @@ export interface ProfileRow {
   play_preference: PlayPreference;
   dominant_hand: DominantHand;
   playing_frequency: PlayingFrequency;
-  years_playing: number;
+  years_playing: YearsPlaying;
   favorite_shot: string | null;
   play_style: string | null;
   onboarding_completed: boolean;
@@ -150,7 +153,7 @@ export interface PublicProfileRow {
   play_preference: PlayPreference;
   dominant_hand: DominantHand;
   playing_frequency: PlayingFrequency;
-  years_playing: number;
+  years_playing: YearsPlaying;
   favorite_shot: string | null;
   play_style: string | null;
   bio: string | null;
