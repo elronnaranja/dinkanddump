@@ -62,31 +62,37 @@ export function PhotoManager({ userId, onCountChange }: PhotoManagerProps) {
   async function pickAndUpload(replacePhotoId?: string) {
     if (!replacePhotoId && photos.length >= MAX_PHOTOS) return;
 
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        "Photo access needed",
-        "Enable photo library access in Settings to add photos."
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-      allowsEditing: true,
-      aspect: [3, 4],
-    });
-    if (result.canceled || !result.assets?.[0]) return;
-
     setError(null);
-    const tempId = replacePhotoId ?? `pending-${Date.now()}`;
-    const position = replacePhotoId
-      ? photos.find((p) => p.row.id === replacePhotoId)?.row.position ?? 0
-      : photos.length;
-
-    setBusyId(tempId);
+    // The whole flow — permission request, launching the picker, and the
+    // compress/upload pipeline — is one try/catch. A failure anywhere here
+    // (permission API failure, picker launch failure, network failure, etc.)
+    // must surface as an error message, never as an unhandled promise
+    // rejection with no user-facing feedback.
+    let tempId: string | undefined;
     try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert(
+          "Photo access needed",
+          "Enable photo library access in Settings to add photos."
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        allowsEditing: true,
+        aspect: [3, 4],
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+
+      tempId = replacePhotoId ?? `pending-${Date.now()}`;
+      const position = replacePhotoId
+        ? photos.find((p) => p.row.id === replacePhotoId)?.row.position ?? 0
+        : photos.length;
+
+      setBusyId(tempId);
       const compressedUri = await compressImage(result.assets[0].uri);
       const fileName = buildPhotoFileName("jpg");
       const path = await uploadPhoto(userId, compressedUri, fileName);

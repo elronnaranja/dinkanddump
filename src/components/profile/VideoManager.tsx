@@ -59,53 +59,56 @@ export function VideoManager({ userId, onVideoChange }: VideoManagerProps) {
   }, [load]);
 
   async function pickAndUpload() {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert(
-        "Photo/video access needed",
-        "Enable photo library access in Settings to add a highlight video."
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-      quality: 1,
-    });
-    if (result.canceled || !result.assets?.[0]) return;
-
-    const asset = result.assets[0];
     setError(null);
-
-    const durationSeconds = asset.duration ? asset.duration / 1000 : null;
-    if (durationSeconds !== null && durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
-      Alert.alert(
-        "Video too long",
-        `Highlight videos must be ${MAX_VIDEO_DURATION_SECONDS} seconds or shorter. ` +
-          "Please trim your video and try again."
-      );
-      return;
-    }
-
+    // As in PhotoManager, the entire flow is one try/catch — permission
+    // request, picker launch, and validation must never produce an
+    // unhandled promise rejection with no user-facing feedback.
     try {
-      const info = await FileSystem.getInfoAsync(asset.uri, { size: true });
-      const size = info.exists ? info.size : undefined;
-      if (size && size > MAX_VIDEO_SIZE_BYTES) {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
         Alert.alert(
-          "Video too large",
-          `Highlight videos must be under ${Math.round(
-            MAX_VIDEO_SIZE_BYTES / (1024 * 1024)
-          )}MB. Please choose a smaller file.`
+          "Photo/video access needed",
+          "Enable photo library access in Settings to add a highlight video."
         );
         return;
       }
-    } catch {
-      // If we can't stat the file, let the upload proceed and rely on the
-      // storage bucket's own file_size_limit as a backstop.
-    }
 
-    setUploading(true);
-    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        quality: 1,
+      });
+      if (result.canceled || !result.assets?.[0]) return;
+
+      const asset = result.assets[0];
+
+      const durationSeconds = asset.duration ? asset.duration / 1000 : null;
+      if (durationSeconds !== null && durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
+        Alert.alert(
+          "Video too long",
+          `Highlight videos must be ${MAX_VIDEO_DURATION_SECONDS} seconds or shorter. ` +
+            "Please trim your video and try again."
+        );
+        return;
+      }
+
+      try {
+        const info = await FileSystem.getInfoAsync(asset.uri, { size: true });
+        const size = info.exists ? info.size : undefined;
+        if (size && size > MAX_VIDEO_SIZE_BYTES) {
+          Alert.alert(
+            "Video too large",
+            `Highlight videos must be under ${Math.round(
+              MAX_VIDEO_SIZE_BYTES / (1024 * 1024)
+            )}MB. Please choose a smaller file.`
+          );
+          return;
+        }
+      } catch {
+        // If we can't stat the file, let the upload proceed and rely on the
+        // storage bucket's own file_size_limit as a backstop.
+      }
+
+      setUploading(true);
       // Replace any existing video first.
       if (video) {
         await deleteStorageVideo(video.storage_path).catch(() => undefined);

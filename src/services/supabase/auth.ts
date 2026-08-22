@@ -42,11 +42,23 @@ export function useAuthSession(): AuthSessionState {
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) return;
-      setSession(data.session);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!isMounted) return;
+        setSession(data.session);
+        setLoading(false);
+      })
+      .catch((error: unknown) => {
+        // A storage-layer failure here (e.g. Keychain/SecureStore access
+        // denied) must not leave the app stuck on a loading spinner forever
+        // with no way to recover — fall back to "signed out" so the user
+        // can at least reach the sign-in screen and retry.
+        console.error("Failed to load auth session:", error);
+        if (!isMounted) return;
+        setSession(null);
+        setLoading(false);
+      });
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
       if (!isMounted) return;

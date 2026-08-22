@@ -91,7 +91,7 @@ export default function BasicProfileScreen() {
           update({ username: v });
           setUsernameStatus("idle");
         }}
-        onEndEditing={() => state.username && checkUsername(state.username)}
+        onBlur={() => state.username && checkUsername(state.username)}
       />
       {usernameStatus === "checking" && <Text style={styles.hint}>Checking availability...</Text>}
       {usernameStatus === "available" && (

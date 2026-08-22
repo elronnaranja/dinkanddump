@@ -1,4 +1,5 @@
 import "react-native-url-polyfill/auto";
+import { Platform } from "react-native";
 import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 import { createClient, type SupportedStorage } from "@supabase/supabase-js";
@@ -12,12 +13,33 @@ import type { Database } from "../../types/database";
  * well under that limit, but if you extend the session/user metadata a lot
  * this adapter may need to switch to chunking or fall back to
  * expo-file-system/AsyncStorage for larger payloads.
+ *
+ * expo-secure-store has no web implementation (its methods throw there), so
+ * this app's primary target — iOS/Android — uses SecureStore, while a web
+ * build (e.g. local dev preview) falls back to localStorage. Session tokens
+ * in localStorage are only as safe as the browser environment they run in,
+ * which is an accepted tradeoff for a web preview of a mobile-first app,
+ * not a hardened web deployment.
  */
-const secureStoreAdapter: SupportedStorage = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
-  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
-};
+const secureStoreAdapter: SupportedStorage =
+  Platform.OS === "web"
+    ? {
+        getItem: (key: string) =>
+          Promise.resolve(typeof localStorage !== "undefined" ? localStorage.getItem(key) : null),
+        setItem: (key: string, value: string) => {
+          if (typeof localStorage !== "undefined") localStorage.setItem(key, value);
+          return Promise.resolve();
+        },
+        removeItem: (key: string) => {
+          if (typeof localStorage !== "undefined") localStorage.removeItem(key);
+          return Promise.resolve();
+        },
+      }
+    : {
+        getItem: (key: string) => SecureStore.getItemAsync(key),
+        setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+        removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+      };
 
 function readEnv(name: "supabaseUrl" | "supabaseAnonKey", processEnvKey: string): string {
   const fromProcessEnv = process.env[processEnvKey];

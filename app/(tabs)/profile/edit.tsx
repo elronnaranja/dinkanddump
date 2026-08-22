@@ -217,7 +217,7 @@ export default function EditProfileScreen() {
         autoCapitalize="none"
         value={username}
         onChangeText={setUsername}
-        onEndEditing={() => checkUsername(username)}
+        onBlur={() => checkUsername(username)}
       />
       {usernameStatus === "checking" && <Text style={styles.hint}>Checking...</Text>}
       {usernameStatus === "taken" && <Text style={styles.error}>Username already taken.</Text>}
