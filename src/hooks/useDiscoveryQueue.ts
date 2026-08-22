@@ -9,8 +9,10 @@ import { getSignedPhotoUrls } from "../services/supabase/storage";
 // candidates, so the deck never visibly runs dry while the next page loads.
 const LOW_WATER_MARK = 4;
 
-// No discovery-preferences screen exists yet (later phase) — sensible
-// defaults that surface a broad set of nearby players.
+// Sensible defaults that surface a broad set of nearby players, used both
+// as the hook's fallback param and as the discovery-preferences screen's
+// (app/discovery-preferences.tsx) fallback when nothing has been persisted
+// yet — see src/services/discoveryPreferences.ts.
 export const DEFAULT_DISCOVERY_FILTERS: DiscoveryFilters = {
   maxDistanceKm: 50,
   skillMin: "1.0",

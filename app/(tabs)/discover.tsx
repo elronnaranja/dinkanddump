@@ -1,12 +1,13 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useAuthSession } from "../../src/services/supabase/auth";
-import { useDiscoveryQueue } from "../../src/hooks/useDiscoveryQueue";
+import { DEFAULT_DISCOVERY_FILTERS, useDiscoveryQueue } from "../../src/hooks/useDiscoveryQueue";
 import { useProfileMedia } from "../../src/hooks/useProfileMedia";
 import { recordSwipe } from "../../src/services/supabase/swipes";
 import { track } from "../../src/services/analytics/track";
-import type { DiscoveryCandidate } from "../../src/types/domain";
+import { loadDiscoveryFilters } from "../../src/services/discoveryPreferences";
+import type { DiscoveryCandidate, DiscoveryFilters } from "../../src/types/domain";
 import { SwipeDeck } from "../../src/components/discovery/SwipeDeck";
 import type { SwipeableCardHandle, SwipeDirection } from "../../src/components/discovery/SwipeableCard";
 import { ActionButtons } from "../../src/components/discovery/ActionButtons";
@@ -14,10 +15,45 @@ import { MoreInfoSheet } from "../../src/components/discovery/MoreInfoSheet";
 import { VideoModal } from "../../src/components/discovery/VideoModal";
 import { EmptyQueueState } from "../../src/components/discovery/EmptyQueueState";
 
+function filtersEqual(a: DiscoveryFilters, b: DiscoveryFilters): boolean {
+  return (
+    a.maxDistanceKm === b.maxDistanceKm &&
+    a.skillMin === b.skillMin &&
+    a.skillMax === b.skillMax &&
+    a.gamePreference === b.gamePreference &&
+    a.playPreference === b.playPreference &&
+    a.limit === b.limit
+  );
+}
+
 export default function DiscoverScreen() {
   const router = useRouter();
   const { session, loading: sessionLoading } = useAuthSession();
   const userId = session?.user.id ?? null;
+
+  // Persisted discovery preferences (app/discovery-preferences.tsx /
+  // src/services/discoveryPreferences.ts). Reloaded every time this screen
+  // regains focus, so returning from the preferences screen after hitting
+  // "Apply" picks up the change. `filtersReady` gates the queue hook's
+  // userId (below) so the very first load already uses the persisted
+  // filters instead of fetching once with defaults and again moments later.
+  const [filters, setFilters] = useState<DiscoveryFilters>(DEFAULT_DISCOVERY_FILTERS);
+  const [filtersReady, setFiltersReady] = useState(false);
+  const didInitialFiltersApply = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      loadDiscoveryFilters().then((loaded) => {
+        if (!mounted) return;
+        setFilters((prev) => (filtersEqual(prev, loaded) ? prev : loaded));
+        setFiltersReady(true);
+      });
+      return () => {
+        mounted = false;
+      };
+    }, [])
+  );
 
   const {
     candidates,
@@ -27,7 +63,23 @@ export default function DiscoverScreen() {
     refresh,
     consumeCandidate,
     restoreCandidate,
-  } = useDiscoveryQueue(userId);
+  } = useDiscoveryQueue(filtersReady ? userId : null, filters);
+
+  // The hook's own mount effect (keyed on userId) already performs the
+  // *first* fetch once filtersReady flips userId from null to a real id
+  // above — so skip calling refresh() for that first transition and only
+  // do it for filter changes discovered on a later focus (i.e. the user
+  // actually changed something in the preferences screen and came back).
+  useEffect(() => {
+    if (!filtersReady) return;
+    if (!didInitialFiltersApply.current) {
+      didInitialFiltersApply.current = true;
+      return;
+    }
+    if (!userId) return;
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, filtersReady]);
 
   const topCandidate: DiscoveryCandidate | null = candidates[0] ?? null;
   const {
@@ -87,7 +139,11 @@ export default function DiscoverScreen() {
     }
   }
 
-  if (sessionLoading || (queueLoading && candidates.length === 0)) {
+  function openFilters() {
+    router.push("/discovery-preferences");
+  }
+
+  if (sessionLoading || !filtersReady || (queueLoading && candidates.length === 0)) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" />
@@ -115,11 +171,18 @@ export default function DiscoverScreen() {
   }
 
   if (!topCandidate) {
-    return <EmptyQueueState onRefresh={refresh} refreshing={queueLoading} />;
+    return (
+      <View style={styles.container}>
+        <DiscoverHeader onOpenFilters={openFilters} />
+        <EmptyQueueState onRefresh={refresh} onAdjustFilters={openFilters} refreshing={queueLoading} />
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
+      <DiscoverHeader onOpenFilters={openFilters} />
+
       {actionError && (
         <View style={styles.errorBanner}>
           <Text style={styles.errorBannerText}>{actionError}</Text>
@@ -158,8 +221,37 @@ export default function DiscoverScreen() {
   );
 }
 
+/** Entry point into app/discovery-preferences.tsx. */
+function DiscoverHeader({ onOpenFilters }: { onOpenFilters: () => void }) {
+  return (
+    <View style={styles.header}>
+      <Text style={styles.headerTitle}>Discover</Text>
+      <Pressable onPress={onOpenFilters} hitSlop={12} style={styles.filterButton}>
+        <Text style={styles.filterButtonText}>Filters</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fafafa" },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 4,
+  },
+  headerTitle: { fontSize: 20, fontWeight: "700" },
+  filterButton: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+  },
+  filterButtonText: { fontSize: 13, fontWeight: "600", color: "#333" },
   center: {
     flex: 1,
     justifyContent: "center",

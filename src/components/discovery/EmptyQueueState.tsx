@@ -1,18 +1,19 @@
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 interface EmptyQueueStateProps {
   onRefresh: () => void;
+  onAdjustFilters: () => void;
   refreshing?: boolean;
 }
 
 /**
  * Shown once the discovery queue is genuinely exhausted (the RPC returned
- * zero candidates within the current filters). There's no discovery
- * preferences screen yet to route to (later phase), so "increase distance"
- * is a real, tappable affordance that's honest about not being wired up
- * yet, rather than a dead link.
+ * zero candidates within the current filters). Routes into
+ * app/discovery-preferences.tsx so the user can actually raise
+ * p_max_distance_km / widen skill range for get_discovery_candidates,
+ * rather than a dead "coming soon" affordance.
  */
-export function EmptyQueueState({ onRefresh, refreshing }: EmptyQueueStateProps) {
+export function EmptyQueueState({ onRefresh, onAdjustFilters, refreshing }: EmptyQueueStateProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>No more players around here.</Text>
@@ -21,19 +22,8 @@ export function EmptyQueueState({ onRefresh, refreshing }: EmptyQueueStateProps)
         your search.
       </Text>
 
-      <Pressable
-        style={styles.secondaryButton}
-        onPress={() =>
-          // TODO(phase-6 or later): route to a discovery preferences screen
-          // once one exists, letting the user raise p_max_distance_km /
-          // widen skill range for get_discovery_candidates.
-          Alert.alert(
-            "Coming soon",
-            "Adjustable discovery distance and skill range are coming in a future update."
-          )
-        }
-      >
-        <Text style={styles.secondaryButtonText}>Increase discovery distance</Text>
+      <Pressable style={styles.secondaryButton} onPress={onAdjustFilters}>
+        <Text style={styles.secondaryButtonText}>Adjust discovery preferences</Text>
       </Pressable>
 
       <Pressable style={styles.primaryButton} onPress={onRefresh} disabled={refreshing}>

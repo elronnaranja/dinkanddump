@@ -68,9 +68,14 @@ export default function ProfileScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My profile</Text>
-        <Pressable onPress={() => router.push("/(tabs)/profile/edit")}>
-          <Text style={styles.editLink}>Edit</Text>
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable onPress={() => router.push("/(tabs)/profile/edit")}>
+            <Text style={styles.editLink}>Edit</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push("/(tabs)/profile/settings")}>
+            <Text style={styles.settingsLink}>Settings</Text>
+          </Pressable>
+        </View>
       </View>
 
       {photos.length > 0 ? (
@@ -163,7 +168,9 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   title: { fontSize: 20, fontWeight: "700" },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   editLink: { color: "#1a7f37", fontWeight: "600", fontSize: 16 },
+  settingsLink: { color: "#666", fontWeight: "600", fontSize: 16 },
   mainPhoto: { width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.1, backgroundColor: "#eee" },
   photoPlaceholder: { alignItems: "center", justifyContent: "center" },
   placeholderText: { color: "#999" },

@@ -8,5 +8,10 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["node_modules"]
+  // supabase/functions/** runs on Deno (Supabase Edge Functions), a
+  // separate runtime/toolchain from this Expo/Node project — it uses
+  // Deno-only globals (Deno.serve, Deno.env) and npm:/jsr: specifiers that
+  // this project's tsc has no type information for, and it's never bundled
+  // by Metro. Excluded here so `tsc --noEmit` only ever checks app code.
+  "exclude": ["node_modules", "supabase/functions"]
 }
