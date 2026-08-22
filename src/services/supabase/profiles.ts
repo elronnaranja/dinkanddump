@@ -28,6 +28,21 @@ export async function getPublicProfile(userId: string): Promise<PublicProfileRow
   return data;
 }
 
+/**
+ * Batch fetch of public_profiles rows for a set of user ids — used to
+ * enrich discovery candidates (which the get_discovery_candidates RPC
+ * returns with only a subset of fields) with game/play preference, bio,
+ * DUPR, etc. in a single round trip.
+ */
+export async function listPublicProfiles(userIds: string[]): Promise<PublicProfileRow[]> {
+  if (userIds.length === 0) return [];
+
+  const { data, error } = await supabase.from("public_profiles").select("*").in("id", userIds);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 export type ProfileInsert = Omit<ProfileRow, "created_at" | "updated_at" | "location">;
 
 export async function upsertProfile(profile: ProfileInsert): Promise<ProfileRow> {

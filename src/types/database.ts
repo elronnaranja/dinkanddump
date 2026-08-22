@@ -130,7 +130,16 @@ export interface ReportRow {
   created_at: string;
 }
 
-/** Row shape of the `public_profiles` view (see migration 0006). */
+/**
+ * Row shape of the `public_profiles` view (see migrations 0009, 0012).
+ *
+ * NOTE: the fields below `play_preference` were added by migration 0012.
+ * Until that migration has been applied to the live Supabase project,
+ * PostgREST will simply omit those keys from the response object (missing,
+ * not null) — callers should treat them as possibly-undefined at runtime
+ * despite the non-optional typing here, e.g. via `row.bio ?? null` rather
+ * than assuming presence.
+ */
 export interface PublicProfileRow {
   id: string;
   first_name: string;
@@ -139,6 +148,13 @@ export interface PublicProfileRow {
   skill_level: SkillLevel;
   game_preference: GamePreference;
   play_preference: PlayPreference;
+  dominant_hand: DominantHand;
+  playing_frequency: PlayingFrequency;
+  years_playing: number;
+  favorite_shot: string | null;
+  play_style: string | null;
+  bio: string | null;
+  dupr_rating: number | null;
   age: number;
 }
 

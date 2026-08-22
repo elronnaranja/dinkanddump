@@ -1,7 +1,9 @@
+import "react-native-gesture-handler";
 import { useEffect, useState } from "react";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAuthSession } from "../src/services/supabase/auth";
 import { getOwnProfile } from "../src/services/supabase/profiles";
@@ -99,13 +101,16 @@ function RoutingGate() {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <StatusBar style="auto" />
-      <RoutingGate />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={styles.root}>
+      <SafeAreaProvider>
+        <StatusBar style="auto" />
+        <RoutingGate />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

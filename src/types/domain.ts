@@ -6,9 +6,12 @@
 
 import type {
   DiscoveryCandidateRow,
+  DominantHand,
   GamePreference,
   MatchStatus,
+  PlayingFrequency,
   PlayPreference,
+  PublicProfileRow,
   SkillLevel,
 } from "./database";
 
@@ -21,6 +24,19 @@ export interface DiscoveryCandidate {
   region: string | null;
   distanceKm: number;
   primaryPhotoUrl: string | null;
+  // The fields below come from a second-pass enrichment against
+  // public_profiles (see mergePublicProfileIntoCandidate) rather than the
+  // get_discovery_candidates RPC itself, so they start out null and are
+  // filled in once that lookup resolves.
+  gamePreference: GamePreference | null;
+  playPreference: PlayPreference | null;
+  bio: string | null;
+  duprRating: number | null;
+  playStyle: string | null;
+  playingFrequency: PlayingFrequency | null;
+  yearsPlaying: number | null;
+  favoriteShot: string | null;
+  dominantHand: DominantHand | null;
 }
 
 export function mapDiscoveryCandidateRow(
@@ -36,6 +52,42 @@ export function mapDiscoveryCandidateRow(
     region: row.region,
     distanceKm: row.distance_km,
     primaryPhotoUrl: photoUrlResolver(row.primary_photo_path),
+    gamePreference: null,
+    playPreference: null,
+    bio: null,
+    duprRating: null,
+    playStyle: null,
+    playingFrequency: null,
+    yearsPlaying: null,
+    favoriteShot: null,
+    dominantHand: null,
+  };
+}
+
+/**
+ * Merges the extra pickleball-profile fields (game/play preference, bio,
+ * DUPR, etc.) from a `public_profiles` row into a discovery candidate.
+ * Fields added by migration 0012 may be `undefined` at runtime if that
+ * migration hasn't been applied yet to the linked Supabase project — this
+ * degrades gracefully to `null` (field just doesn't render) rather than
+ * throwing.
+ */
+export function mergePublicProfileIntoCandidate(
+  candidate: DiscoveryCandidate,
+  profile: PublicProfileRow | undefined
+): DiscoveryCandidate {
+  if (!profile) return candidate;
+  return {
+    ...candidate,
+    gamePreference: profile.game_preference ?? null,
+    playPreference: profile.play_preference ?? null,
+    bio: profile.bio ?? null,
+    duprRating: profile.dupr_rating ?? null,
+    playStyle: profile.play_style ?? null,
+    playingFrequency: profile.playing_frequency ?? null,
+    yearsPlaying: profile.years_playing ?? null,
+    favoriteShot: profile.favorite_shot ?? null,
+    dominantHand: profile.dominant_hand ?? null,
   };
 }
 
