@@ -8,12 +8,20 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAuthSession } from "../src/services/supabase/auth";
 import { getOwnProfile } from "../src/services/supabase/profiles";
 
-type RootGroup = "(auth)" | "(onboarding)" | "(tabs)" | null;
+// Only (auth) and (onboarding) are gated groups a signed-in, onboarded user
+// must never be left in. Everything else — (tabs), and root-level modal
+// routes like /match/[matchId] and /discovery-preferences that intentionally
+// live outside the tab layout — is legitimate app content once authenticated
+// and onboarded, and must NOT be force-redirected to Discover. An earlier
+// version of this gate treated "not literally inside (tabs)" as "redirect to
+// Discover", which meant every push to /match/[matchId] or
+// /discovery-preferences was immediately reverted before it could render.
+type GatedGroup = "(auth)" | "(onboarding)" | null;
 
-function useCurrentRootGroup(): RootGroup {
+function useCurrentGatedGroup(): GatedGroup {
   const segments = useSegments();
   const first = segments[0];
-  if (first === "(auth)" || first === "(onboarding)" || first === "(tabs)") {
+  if (first === "(auth)" || first === "(onboarding)") {
     return first;
   }
   return null;
@@ -22,11 +30,14 @@ function useCurrentRootGroup(): RootGroup {
 /**
  * Routing gate: waits for the auth session to resolve, then (once signed
  * in) fetches the profile's onboarding_completed flag to decide whether the
- * user belongs in (auth), (onboarding), or (tabs).
+ * user belongs in (auth) or (onboarding). Once both checks pass, the gate
+ * steps aside — it does not pin the user to (tabs) specifically, since
+ * legitimate root-level routes like /match/[matchId] and
+ * /discovery-preferences live outside that group too.
  */
 function RoutingGate() {
   const router = useRouter();
-  const currentGroup = useCurrentRootGroup();
+  const currentGroup = useCurrentGatedGroup();
   const { session, loading: sessionLoading } = useAuthSession();
 
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
@@ -80,7 +91,12 @@ function RoutingGate() {
       return;
     }
 
-    if (currentGroup !== "(tabs)") {
+    // Authenticated and onboarded: only redirect away from leftover
+    // (auth)/(onboarding) routes. Anything else — (tabs), or a root-level
+    // modal route like /match/[matchId] or /discovery-preferences — is
+    // legitimate content the user navigated to on purpose and must be left
+    // alone.
+    if (currentGroup === "(auth)" || currentGroup === "(onboarding)") {
       router.replace("/(tabs)/discover");
     }
   }, [sessionLoading, session, profileLoading, onboardingCompleted, currentGroup, router]);

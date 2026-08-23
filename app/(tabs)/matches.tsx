@@ -16,6 +16,7 @@ import { getConversationForMatch } from "../../src/services/supabase/matches";
 import type { MatchListItem } from "../../src/types/domain";
 import { formatDistanceKm } from "../../src/utils/distance";
 import { formatRelativeShort } from "../../src/utils/time";
+import { skillLevelLabel } from "../../src/constants/pickleballOptions";
 
 /**
  * Full list of the current user's active matches. Distinct from the
@@ -112,7 +113,10 @@ export default function MatchesScreen() {
 }
 
 function MatchRow({ match, onPress }: { match: MatchListItem; onPress: () => void }) {
-  const meta = [match.skillLevel, match.distanceKm != null ? formatDistanceKm(match.distanceKm) : null]
+  const meta = [
+    match.skillLevel ? skillLevelLabel(match.skillLevel) : null,
+    match.distanceKm != null ? formatDistanceKm(match.distanceKm) : null,
+  ]
     .filter(Boolean)
     .join(" • ");
 

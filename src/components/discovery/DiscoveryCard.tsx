@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import type { DiscoveryCandidate } from "../../types/domain";
 import type { ProfilePhotoWithUrl } from "../../hooks/useProfileMedia";
 import { formatDistanceKm } from "../../utils/distance";
-import { gamePreferenceLabel } from "../../constants/pickleballOptions";
+import { gamePreferenceLabel, skillLevelLabel } from "../../constants/pickleballOptions";
 
 interface DiscoveryCardProps {
   candidate: DiscoveryCandidate;
@@ -92,7 +92,7 @@ export function DiscoveryCard({
         </Text>
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{candidate.skillLevel}</Text>
+            <Text style={styles.badgeText}>{skillLevelLabel(candidate.skillLevel)}</Text>
           </View>
           {candidate.gamePreference && (
             <View style={styles.badge}>
