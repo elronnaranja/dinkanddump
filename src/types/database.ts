@@ -297,7 +297,7 @@ export interface Database {
     };
     Functions: {
       record_swipe: {
-        Args: { to_user_id: string; p_action: string };
+        Args: { p_to_user_id: string; p_action: string };
         Returns: RecordSwipeResult;
       };
       get_discovery_candidates: {

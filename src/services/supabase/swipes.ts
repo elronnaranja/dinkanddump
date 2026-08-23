@@ -15,7 +15,7 @@ export async function recordSwipe(
   action: SwipeActionInput
 ): Promise<MatchResult> {
   const { data, error } = await supabase.rpc("record_swipe", {
-    to_user_id: toUserId,
+    p_to_user_id: toUserId,
     p_action: action,
   });
 
