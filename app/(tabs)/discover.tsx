@@ -22,6 +22,7 @@ function filtersEqual(a: DiscoveryFilters, b: DiscoveryFilters): boolean {
     a.skillMax === b.skillMax &&
     a.gamePreference === b.gamePreference &&
     a.playPreference === b.playPreference &&
+    a.genderPreference === b.genderPreference &&
     a.limit === b.limit
   );
 }
