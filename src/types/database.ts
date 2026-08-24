@@ -24,7 +24,7 @@ export type PlayingFrequency =
   | "two_to_three_per_week"
   | "four_plus_per_week";
 export type YearsPlaying = "less_than_1" | "one_to_two" | "three_to_five" | "five_plus";
-export type Gender = "male" | "female" | "non_binary" | "other" | "prefer_not_to_say";
+export type Gender = "male" | "female" | "other";
 
 export type VideoStatus = "processing" | "active" | "failed";
 export type SwipeAction = "dink" | "dump";
@@ -57,6 +57,7 @@ export interface ProfileRow {
   favorite_shot: string | null;
   play_style: string | null;
   onboarding_completed: boolean;
+  email_verified: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -158,10 +159,11 @@ export interface PublicProfileRow {
   play_style: string | null;
   bio: string | null;
   dupr_rating: number | null;
+  email_verified: boolean;
   age: number;
 }
 
-/** Return row shape of the `get_discovery_candidates` RPC (migration 0008). */
+/** Return row shape of the `get_discovery_candidates` RPC (migration 0020). */
 export interface DiscoveryCandidateRow {
   id: string;
   first_name: string;
@@ -171,6 +173,7 @@ export interface DiscoveryCandidateRow {
   region: string | null;
   distance_km: number;
   primary_photo_path: string | null;
+  email_verified: boolean;
 }
 
 /** Return shape of the `record_swipe` RPC (migration 0007). */
@@ -211,6 +214,7 @@ export interface Database {
           | "favorite_shot"
           | "play_style"
           | "onboarding_completed"
+          | "email_verified"
         >;
         Update: Partial<Omit<ProfileRow, "id" | "location" | "created_at" | "updated_at">>;
         Relationships: [];

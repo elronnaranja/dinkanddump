@@ -40,6 +40,7 @@ export interface DiscoveryCandidate {
   yearsPlaying: YearsPlaying | null;
   favoriteShot: string | null;
   dominantHand: DominantHand | null;
+  emailVerified: boolean;
 }
 
 export function mapDiscoveryCandidateRow(
@@ -64,6 +65,7 @@ export function mapDiscoveryCandidateRow(
     yearsPlaying: null,
     favoriteShot: null,
     dominantHand: null,
+    emailVerified: row.email_verified,
   };
 }
 

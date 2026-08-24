@@ -43,7 +43,9 @@ export async function listPublicProfiles(userIds: string[]): Promise<PublicProfi
   return data ?? [];
 }
 
-export type ProfileInsert = Omit<ProfileRow, "created_at" | "updated_at" | "location">;
+// email_verified is server-maintained only (synced from auth.users by a
+// trigger — see migration 0020) — never client-settable, same as location.
+export type ProfileInsert = Omit<ProfileRow, "created_at" | "updated_at" | "location" | "email_verified">;
 
 export async function upsertProfile(profile: ProfileInsert): Promise<ProfileRow> {
   const { data, error } = await supabase

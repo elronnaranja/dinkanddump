@@ -60,9 +60,36 @@ export const YEARS_PLAYING_OPTIONS: ChoiceOption<YearsPlaying>[] = [
 export const GENDER_OPTIONS: ChoiceOption<Gender>[] = [
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
-  { value: "non_binary", label: "Non-binary" },
   { value: "other", label: "Other" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
+];
+
+// favorite_shot and play_style are free-text columns (not DB enums), so
+// these are curated pickers rather than a strict type — a single option is
+// stored verbatim as the column value, same as if it had been typed in.
+export const FAVORITE_SHOT_OPTIONS: ChoiceOption<string>[] = [
+  { value: "Third-shot drop", label: "Third-shot drop" },
+  { value: "Dink", label: "Dink" },
+  { value: "Serve", label: "Serve" },
+  { value: "Return of serve", label: "Return of serve" },
+  { value: "Drive", label: "Drive" },
+  { value: "Volley", label: "Volley" },
+  { value: "Smash", label: "Smash" },
+  { value: "Lob", label: "Lob" },
+  { value: "Erne", label: "Erne" },
+  { value: "Backhand", label: "Backhand" },
+  { value: "Forehand", label: "Forehand" },
+  { value: "Around-the-post (ATP)", label: "Around-the-post (ATP)" },
+];
+
+export const PLAY_STYLE_OPTIONS: ChoiceOption<string>[] = [
+  { value: "Aggressive net play", label: "Aggressive net play" },
+  { value: "Baseline defender", label: "Baseline defender" },
+  { value: "All-court player", label: "All-court player" },
+  { value: "Power hitter", label: "Power hitter" },
+  { value: "Finesse / soft game", label: "Finesse / soft game" },
+  { value: "Counter-puncher", label: "Counter-puncher" },
+  { value: "Consistent rally builder", label: "Consistent rally builder" },
+  { value: "Net rusher", label: "Net rusher" },
 ];
 
 export function skillLevelLabel(level: SkillLevel): string {

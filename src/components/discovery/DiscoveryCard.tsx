@@ -65,6 +65,17 @@ export function DiscoveryCard({
         </View>
       )}
 
+      {/*
+        Tapping the card opens the full info sheet — this sits underneath
+        (rendered first, so later siblings win hit-testing) the narrow
+        photo-cycle edge strips below, which is what keeps prev/next photo
+        taps working without needing every tap on the card to be claimed by
+        one specific zone. Gated on `interactive` the same as everything
+        else here: peek cards behind the top of the stack shouldn't react
+        to taps at all.
+      */}
+      {interactive && <Pressable style={styles.infoTapLayer} onPress={onOpenInfo} />}
+
       {interactive && photoUrls.length > 1 && (
         <>
           <Pressable style={styles.tapZoneLeft} onPress={goPrev} />
@@ -105,15 +116,10 @@ export function DiscoveryCard({
         )}
       </View>
 
-      {interactive && (
+      {interactive && hasVideo && (
         <View style={styles.actionBadges} pointerEvents="box-none">
-          {hasVideo && (
-            <Pressable style={styles.iconBadge} onPress={onOpenVideo} accessibilityLabel="Play gameplay video">
-              <Text style={styles.iconBadgeText}>Video</Text>
-            </Pressable>
-          )}
-          <Pressable style={styles.iconBadge} onPress={onOpenInfo} accessibilityLabel="More info">
-            <Text style={styles.iconBadgeText}>Info</Text>
+          <Pressable style={styles.iconBadge} onPress={onOpenVideo} accessibilityLabel="Play gameplay video">
+            <Text style={styles.iconBadgeText}>Video</Text>
           </Pressable>
         </View>
       )}
@@ -131,8 +137,11 @@ const styles = StyleSheet.create({
   image: { ...StyleSheet.absoluteFillObject },
   placeholder: { alignItems: "center", justifyContent: "center" },
   placeholderText: { color: "#999" },
-  tapZoneLeft: { position: "absolute", top: 0, bottom: 0, left: 0, width: "50%" },
-  tapZoneRight: { position: "absolute", top: 0, bottom: 0, right: 0, width: "50%" },
+  infoTapLayer: { ...StyleSheet.absoluteFillObject },
+  // Narrow edge strips for photo prev/next, leaving the large middle
+  // portion of the card free to fall through to infoTapLayer above.
+  tapZoneLeft: { position: "absolute", top: 0, bottom: 0, left: 0, width: "22%" },
+  tapZoneRight: { position: "absolute", top: 0, bottom: 0, right: 0, width: "22%" },
   dotsRow: {
     position: "absolute",
     top: 12,
