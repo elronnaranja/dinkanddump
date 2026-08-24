@@ -101,7 +101,10 @@ export function PhotoManager({ userId, emailVerified, onCountChange }: PhotoMana
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         quality: 1,
         allowsEditing: true,
-        aspect: [3, 4],
+        // 4:5 portrait, matching every other place photos/video are shown
+        // (see MediaSlider.tsx) — forcing the crop here means every stored
+        // photo is already the right shape, no separate validation needed.
+        aspect: [4, 5],
       });
       if (result.canceled || !result.assets?.[0]) return;
 

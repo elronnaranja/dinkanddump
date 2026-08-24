@@ -87,6 +87,19 @@ export function VideoManager({ userId, onVideoChange }: VideoManagerProps) {
 
       const asset = result.assets[0];
 
+      // Unlike photos, the video picker has no crop UI to force a shape at
+      // pick time (iOS's video picker only trims duration), so orientation
+      // has to be validated after the fact against the asset's own
+      // metadata. width/height reflect the video's display orientation
+      // (already rotation-corrected) on both platforms.
+      if (asset.width && asset.height && asset.width >= asset.height) {
+        Alert.alert(
+          "Portrait video required",
+          "Highlight videos must be portrait (taller than wide), matching your photos. Please choose a different video."
+        );
+        return;
+      }
+
       const durationSeconds = asset.duration ? asset.duration / 1000 : null;
       if (durationSeconds !== null && durationSeconds > MAX_VIDEO_DURATION_SECONDS) {
         Alert.alert(

@@ -13,7 +13,11 @@ import {
 import type { ProfilePhotoWithUrl } from "../../hooks/useProfileMedia";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SLIDER_HEIGHT = 340;
+// 4:5 portrait everywhere media is shown (Discover's full-details sheet and
+// the profile screen both use this component) — one consistent shape for
+// every photo and video, matching PhotoManager's upload crop (see
+// PhotoManager.tsx's `aspect: [4, 5]`) and VideoManager's portrait check.
+const SLIDER_HEIGHT = Math.round(SCREEN_WIDTH * (5 / 4));
 
 interface MediaSliderProps {
   photos: ProfilePhotoWithUrl[];

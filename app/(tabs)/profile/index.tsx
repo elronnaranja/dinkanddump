@@ -1,20 +1,13 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-  Dimensions,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, Pressable, ActivityIndicator, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../../src/services/supabase/auth";
 import { useProfile } from "../../../src/hooks/useProfile";
 import { useProfileMedia } from "../../../src/hooks/useProfileMedia";
 import { VerifiedBadge } from "../../../src/components/ui/VerifiedBadge";
+import { MediaSlider } from "../../../src/components/discovery/MediaSlider";
+import { VideoModal } from "../../../src/components/discovery/VideoModal";
 import { calculateAge } from "../../../src/utils/age";
 import {
   dominantHandLabel,
@@ -25,8 +18,6 @@ import {
   yearsPlayingLabel,
 } from "../../../src/constants/pickleballOptions";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -36,10 +27,11 @@ export default function ProfileScreen() {
   const {
     photos,
     video,
+    videoUrl,
     videoThumbnailUrl,
     loading: mediaLoading,
   } = useProfileMedia(userId);
-  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+  const [videoVisible, setVideoVisible] = useState(false);
 
   if (profileLoading || mediaLoading) {
     return (
@@ -67,7 +59,6 @@ export default function ProfileScreen() {
 
   const age = calculateAge(profile.date_of_birth);
   const location = [profile.city, profile.region].filter(Boolean).join(", ");
-  const activePhoto = photos[activePhotoIndex] ?? photos[0];
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -83,43 +74,17 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {photos.length > 0 ? (
-        <View>
-          <Image source={{ uri: activePhoto?.url ?? undefined }} style={styles.mainPhoto} />
-          {photos.length > 1 && (
-            <View style={styles.thumbRow}>
-              {photos.map((p, index) => (
-                <Pressable key={p.row.id} onPress={() => setActivePhotoIndex(index)}>
-                  <Image
-                    source={{ uri: p.url ?? undefined }}
-                    style={[
-                      styles.thumb,
-                      index === activePhotoIndex && styles.thumbActive,
-                    ]}
-                  />
-                </Pressable>
-              ))}
-            </View>
-          )}
-        </View>
-      ) : (
-        <View style={[styles.mainPhoto, styles.photoPlaceholder]}>
-          <Text style={styles.placeholderText}>No photos yet</Text>
-        </View>
-      )}
-
-      {video && (
-        <View style={styles.videoSection}>
-          <Text style={styles.sectionLabel}>Highlight video</Text>
-          {videoThumbnailUrl ? (
-            <Image source={{ uri: videoThumbnailUrl }} style={styles.videoThumb} />
-          ) : (
-            <View style={[styles.videoThumb, styles.photoPlaceholder]}>
-              <Text style={styles.placeholderText}>Video</Text>
-            </View>
-          )}
-        </View>
-      )}
+      <MediaSlider
+        photos={photos}
+        hasVideo={!!video}
+        videoThumbnailUrl={videoThumbnailUrl}
+        onOpenVideo={() => setVideoVisible(true)}
+      />
+      <VideoModal
+        visible={videoVisible}
+        videoUrl={videoUrl}
+        onClose={() => setVideoVisible(false)}
+      />
 
       <View style={styles.section}>
         <View style={styles.nameRow}>
@@ -178,14 +143,6 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: "row", alignItems: "center", gap: 16 },
   editLink: { color: "#1a7f37", fontWeight: "600", fontSize: 16 },
   settingsLink: { color: "#666", fontWeight: "600", fontSize: 16 },
-  mainPhoto: { width: SCREEN_WIDTH, height: SCREEN_WIDTH * 1.1, backgroundColor: "#eee" },
-  photoPlaceholder: { alignItems: "center", justifyContent: "center" },
-  placeholderText: { color: "#999" },
-  thumbRow: { flexDirection: "row", gap: 8, padding: 12 },
-  thumb: { width: 56, height: 56, borderRadius: 8, opacity: 0.6 },
-  thumbActive: { opacity: 1, borderWidth: 2, borderColor: "#1a7f37" },
-  videoSection: { paddingHorizontal: 20, marginTop: 16 },
-  videoThumb: { width: "100%", height: 200, borderRadius: 10, backgroundColor: "#eee" },
   section: { paddingHorizontal: 20, marginTop: 20 },
   sectionLabel: { fontSize: 13, fontWeight: "700", color: "#999", marginBottom: 8 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
