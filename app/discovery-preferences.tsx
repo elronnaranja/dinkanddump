@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { SegmentedChoice } from "../src/components/ui/SegmentedChoice";
-import { DISTANCE_KM_OPTIONS } from "../src/constants/discoveryOptions";
+import { SegmentedChoice, type ChoiceOption } from "../src/components/ui/SegmentedChoice";
+import { DISTANCE_KM_OPTIONS, GENDER_PREFERENCE_OPTIONS } from "../src/constants/discoveryOptions";
 import {
   GAME_PREFERENCE_OPTIONS,
   PLAY_PREFERENCE_OPTIONS,
@@ -11,7 +11,7 @@ import {
 import { loadDiscoveryFilters, saveDiscoveryFilters } from "../src/services/discoveryPreferences";
 import { DEFAULT_DISCOVERY_FILTERS } from "../src/hooks/useDiscoveryQueue";
 import type { DiscoveryFilters } from "../src/types/domain";
-import type { GamePreference, PlayPreference, SkillLevel } from "../src/types/database";
+import type { GamePreference, Gender, PlayPreference, SkillLevel } from "../src/types/database";
 
 // A "Both" filter choice means "don't filter on this field" — the RPC
 // (get_discovery_candidates, migration 0014) treats a null p_game_pref /
@@ -22,6 +22,17 @@ import type { GamePreference, PlayPreference, SkillLevel } from "../src/types/da
 // 'both' value for profile fields, so here it's remapped to/from null at
 // the UI boundary rather than redefining the option lists.
 const BOTH = "both";
+
+// Unlike game/play preference, the `gender` enum has no real 'both' value
+// (it's male/female/non_binary/other/prefer_not_to_say — see 0002), so
+// GENDER_PREFERENCE_OPTIONS (discoveryOptions.ts) only lists Male/Female.
+// The synthetic BOTH option is added here, UI-side only, to mean "don't
+// filter on gender" — remapped to/from null at the same boundary as
+// game/play preference above.
+const GENDER_PREFERENCE_WITH_BOTH: ChoiceOption<Gender | typeof BOTH>[] = [
+  ...GENDER_PREFERENCE_OPTIONS,
+  { value: BOTH, label: "Both" },
+];
 
 const SKILL_LEVEL_VALUES = SKILL_LEVEL_OPTIONS.map((o) => o.value);
 
@@ -35,8 +46,8 @@ function skillIndex(level: SkillLevel): number {
  * app/match/[matchId].tsx already uses for a full-screen view that isn't
  * part of any tab.
  *
- * Deliberately just four controls per the product spec (distance, skill
- * range, game type, play type) — no additional filters. Uses an explicit
+ * Distance, skill range, game type, play type, and who to see (gender) —
+ * kept intentionally short, no sprawling filter list. Uses an explicit
  * "Apply" button rather than apply-on-change so a half-adjusted filter set
  * never silently affects the live discovery queue until the user commits.
  */
@@ -88,6 +99,10 @@ export default function DiscoveryPreferencesScreen() {
 
   function handlePlayPreferenceChange(value: PlayPreference | typeof BOTH) {
     setFilters((f) => ({ ...f, playPreference: value === BOTH ? null : value }));
+  }
+
+  function handleGenderPreferenceChange(value: Gender | typeof BOTH) {
+    setFilters((f) => ({ ...f, genderPreference: value === BOTH ? null : value }));
   }
 
   async function handleApply() {
@@ -162,6 +177,15 @@ export default function DiscoveryPreferencesScreen() {
             options={PLAY_PREFERENCE_OPTIONS}
             value={filters.playPreference ?? BOTH}
             onChange={handlePlayPreferenceChange}
+            columns={3}
+          />
+        </Section>
+
+        <Section label="Show me">
+          <SegmentedChoice
+            options={GENDER_PREFERENCE_WITH_BOTH}
+            value={filters.genderPreference ?? BOTH}
+            onChange={handleGenderPreferenceChange}
             columns={3}
           />
         </Section>

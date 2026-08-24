@@ -19,6 +19,7 @@ export const DEFAULT_DISCOVERY_FILTERS: DiscoveryFilters = {
   skillMax: "5.0+",
   gamePreference: null,
   playPreference: null,
+  genderPreference: null,
   limit: 20,
 };
 

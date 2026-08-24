@@ -8,6 +8,7 @@ import type {
   DiscoveryCandidateRow,
   DominantHand,
   GamePreference,
+  Gender,
   MatchStatus,
   MessageRow,
   PlayingFrequency,
@@ -99,6 +100,8 @@ export interface DiscoveryFilters {
   skillMax: SkillLevel;
   gamePreference: GamePreference | null;
   playPreference: PlayPreference | null;
+  /** Who to show. null = everyone, regardless of gender. */
+  genderPreference: Gender | null;
   limit: number;
 }
 

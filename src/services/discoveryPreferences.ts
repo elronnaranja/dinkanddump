@@ -27,6 +27,13 @@ function isDiscoveryFilters(value: unknown): value is DiscoveryFilters {
     typeof v.skillMax === "string" &&
     (v.gamePreference === null || typeof v.gamePreference === "string") &&
     (v.playPreference === null || typeof v.playPreference === "string") &&
+    // genderPreference was added after this store format shipped — also
+    // accept a missing key (undefined) from a value saved before that
+    // change, rather than invalidating the whole cached object over one
+    // new, backward-compatible field.
+    (v.genderPreference === null ||
+      v.genderPreference === undefined ||
+      typeof v.genderPreference === "string") &&
     typeof v.limit === "number"
   );
 }
@@ -42,7 +49,11 @@ export async function loadDiscoveryFilters(): Promise<DiscoveryFilters> {
     if (!raw) return DEFAULT_DISCOVERY_FILTERS;
 
     const parsed: unknown = JSON.parse(raw);
-    return isDiscoveryFilters(parsed) ? parsed : DEFAULT_DISCOVERY_FILTERS;
+    if (!isDiscoveryFilters(parsed)) return DEFAULT_DISCOVERY_FILTERS;
+    // Normalize a value saved before genderPreference existed (missing key
+    // -> undefined) to the real "no preference" value the rest of the app
+    // expects.
+    return { ...parsed, genderPreference: parsed.genderPreference ?? null };
   } catch {
     return DEFAULT_DISCOVERY_FILTERS;
   }

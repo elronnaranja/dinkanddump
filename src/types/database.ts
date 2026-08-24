@@ -307,6 +307,7 @@ export interface Database {
           p_skill_max: string;
           p_game_pref: string | null;
           p_play_pref: string | null;
+          p_gender_pref: string | null;
           p_limit: number;
         };
         Returns: DiscoveryCandidateRow[];
