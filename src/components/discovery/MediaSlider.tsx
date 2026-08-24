@@ -13,11 +13,17 @@ import {
 import type { ProfilePhotoWithUrl } from "../../hooks/useProfileMedia";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_GAP = 12;
+const SIDE_INSET = 24;
+// A card peeks in at the edge rather than filling the viewport, so the
+// carousel reads as "there's more" without needing dots to communicate it.
+const CARD_WIDTH = SCREEN_WIDTH - SIDE_INSET * 2;
 // 4:5 portrait everywhere media is shown (Discover's full-details sheet and
 // the profile screen both use this component) — one consistent shape for
 // every photo and video, matching PhotoManager's upload crop (see
 // PhotoManager.tsx's `aspect: [4, 5]`) and VideoManager's portrait check.
-const SLIDER_HEIGHT = Math.round(SCREEN_WIDTH * (5 / 4));
+const CARD_HEIGHT = Math.round(CARD_WIDTH * (5 / 4));
+const SNAP_INTERVAL = CARD_WIDTH + CARD_GAP;
 
 interface MediaSliderProps {
   photos: ProfilePhotoWithUrl[];
@@ -27,26 +33,32 @@ interface MediaSliderProps {
 }
 
 /**
- * Swipeable photo + video carousel for the full-details sheet. The card
- * itself (DiscoveryCard) already lets you tap the edges to cycle photos one
- * at a time, but that's a discovery-speed shortcut, not a real way to browse
- * everything someone posted — this is the "actually look through their
- * media" view, so a video (if any) is appended as a final slide rather than
- * hidden behind a separate badge.
+ * Photo + video carousel for the full-details sheet and the profile screen.
+ * Renders as a peeking card carousel (each card narrower than the viewport,
+ * with a gap and a sliver of the next one visible) rather than full-bleed
+ * pages, and is meant to sit inline in the surrounding vertical ScrollView
+ * (not pinned above it) so it scrolls away with the rest of the content.
+ * The card itself (DiscoveryCard) already lets you tap the edges to cycle
+ * photos one at a time, but that's a discovery-speed shortcut, not a real
+ * way to browse everything someone posted — this is the "actually look
+ * through their media" view, so a video (if any) is appended as a final
+ * card rather than hidden behind a separate badge.
  */
 export function MediaSlider({ photos, hasVideo, videoThumbnailUrl, onOpenVideo }: MediaSliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const slideCount = photos.length + (hasVideo ? 1 : 0);
 
   function handleMomentumEnd(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+    const index = Math.round(e.nativeEvent.contentOffset.x / SNAP_INTERVAL);
     setActiveIndex(index);
   }
 
   if (slideCount === 0) {
     return (
-      <View style={[styles.slide, styles.placeholder]}>
-        <Text style={styles.placeholderText}>No photos yet</Text>
+      <View style={styles.container}>
+        <View style={[styles.card, styles.placeholder]}>
+          <Text style={styles.placeholderText}>No photos yet</Text>
+        </View>
       </View>
     );
   }
@@ -55,22 +67,25 @@ export function MediaSlider({ photos, hasVideo, videoThumbnailUrl, onOpenVideo }
     <View style={styles.container}>
       <ScrollView
         horizontal
-        pagingEnabled
         showsHorizontalScrollIndicator={false}
+        snapToInterval={SNAP_INTERVAL}
+        decelerationRate="fast"
+        snapToAlignment="start"
+        contentContainerStyle={styles.scrollContent}
         onMomentumScrollEnd={handleMomentumEnd}
       >
-        {photos.map((photo, index) =>
+        {photos.map((photo) =>
           photo.url ? (
-            <Image key={photo.row.id} source={{ uri: photo.url }} style={styles.slide} />
+            <Image key={photo.row.id} source={{ uri: photo.url }} style={styles.card} />
           ) : (
-            <View key={photo.row.id} style={[styles.slide, styles.placeholder]}>
+            <View key={photo.row.id} style={[styles.card, styles.placeholder]}>
               <Text style={styles.placeholderText}>Photo unavailable</Text>
             </View>
           )
         )}
 
         {hasVideo && (
-          <Pressable style={styles.slide} onPress={onOpenVideo} accessibilityLabel="Play gameplay video">
+          <Pressable style={styles.card} onPress={onOpenVideo} accessibilityLabel="Play gameplay video">
             {videoThumbnailUrl ? (
               <Image source={{ uri: videoThumbnailUrl }} style={StyleSheet.absoluteFillObject} />
             ) : (
@@ -95,9 +110,16 @@ export function MediaSlider({ photos, hasVideo, videoThumbnailUrl, onOpenVideo }
 }
 
 const styles = StyleSheet.create({
-  container: { height: SLIDER_HEIGHT, backgroundColor: "#eee" },
-  slide: { width: SCREEN_WIDTH, height: SLIDER_HEIGHT },
-  placeholder: { alignItems: "center", justifyContent: "center", backgroundColor: "#eee" },
+  container: { paddingTop: 4 },
+  scrollContent: { paddingHorizontal: SIDE_INSET, gap: CARD_GAP },
+  card: {
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 24,
+    overflow: "hidden",
+    backgroundColor: "#eee",
+  },
+  placeholder: { alignItems: "center", justifyContent: "center" },
   placeholderText: { color: "#999" },
   videoPlaceholder: { backgroundColor: "#222" },
   playButton: {
@@ -121,19 +143,16 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   dotsRow: {
-    position: "absolute",
-    bottom: 12,
-    left: 0,
-    right: 0,
     flexDirection: "row",
     justifyContent: "center",
     gap: 5,
+    marginTop: 10,
   },
   dot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "rgba(255,255,255,0.5)",
+    backgroundColor: "#ddd",
   },
-  dotActive: { backgroundColor: "#fff", width: 8, height: 8, borderRadius: 4 },
+  dotActive: { backgroundColor: "#1a7f37", width: 8, height: 8, borderRadius: 4 },
 });

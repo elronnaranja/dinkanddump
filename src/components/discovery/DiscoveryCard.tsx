@@ -133,7 +133,8 @@ export function DiscoveryCard({
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
+    width: "100%",
+    aspectRatio: 4 / 5,
     borderRadius: 24,
     overflow: "hidden",
     backgroundColor: "#eee",

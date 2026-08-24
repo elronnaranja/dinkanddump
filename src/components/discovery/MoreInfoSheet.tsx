@@ -91,53 +91,55 @@ export function MoreInfoSheet({
           </View>
         </View>
 
-        <MediaSlider
-          photos={photos}
-          hasVideo={hasVideo}
-          videoThumbnailUrl={videoThumbnailUrl}
-          onOpenVideo={onOpenVideo}
-        />
-
         <ScrollView contentContainerStyle={styles.content}>
-          {candidate.bio ? <Text style={styles.bio}>{candidate.bio}</Text> : null}
+          <MediaSlider
+            photos={photos}
+            hasVideo={hasVideo}
+            videoThumbnailUrl={videoThumbnailUrl}
+            onOpenVideo={onOpenVideo}
+          />
 
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Pickleball</Text>
-            <InfoRow label="Skill level" value={skillLevelLabel(candidate.skillLevel)} />
-            {candidate.duprRating != null && (
-              <InfoRow
-                label="DUPR rating"
-                value={`${candidate.duprRating} (self-entered, unverified)`}
-              />
+          <View style={styles.textContent}>
+            {candidate.bio ? <Text style={styles.bio}>{candidate.bio}</Text> : null}
+
+            <View style={styles.section}>
+              <Text style={styles.sectionLabel}>Pickleball</Text>
+              <InfoRow label="Skill level" value={skillLevelLabel(candidate.skillLevel)} />
+              {candidate.duprRating != null && (
+                <InfoRow
+                  label="DUPR rating"
+                  value={`${candidate.duprRating} (self-entered, unverified)`}
+                />
+              )}
+              {candidate.gamePreference && (
+                <InfoRow label="Prefers" value={gamePreferenceLabel(candidate.gamePreference)} />
+              )}
+              {candidate.playPreference && (
+                <InfoRow label="Style" value={playPreferenceLabel(candidate.playPreference)} />
+              )}
+              {candidate.dominantHand && (
+                <InfoRow label="Dominant hand" value={dominantHandLabel(candidate.dominantHand)} />
+              )}
+              {candidate.playingFrequency && (
+                <InfoRow label="Plays" value={playingFrequencyLabel(candidate.playingFrequency)} />
+              )}
+              {candidate.yearsPlaying != null && (
+                <InfoRow label="Years playing" value={yearsPlayingLabel(candidate.yearsPlaying)} />
+              )}
+              {candidate.favoriteShot ? (
+                <InfoRow label="Favorite shot" value={candidate.favoriteShot} />
+              ) : null}
+              {candidate.playStyle ? (
+                <InfoRow label="Play style" value={candidate.playStyle} />
+              ) : null}
+            </View>
+
+            {!hasAnyExtra && (
+              <Text style={styles.hint}>
+                {candidate.firstName} hasn't shared more pickleball details yet.
+              </Text>
             )}
-            {candidate.gamePreference && (
-              <InfoRow label="Prefers" value={gamePreferenceLabel(candidate.gamePreference)} />
-            )}
-            {candidate.playPreference && (
-              <InfoRow label="Style" value={playPreferenceLabel(candidate.playPreference)} />
-            )}
-            {candidate.dominantHand && (
-              <InfoRow label="Dominant hand" value={dominantHandLabel(candidate.dominantHand)} />
-            )}
-            {candidate.playingFrequency && (
-              <InfoRow label="Plays" value={playingFrequencyLabel(candidate.playingFrequency)} />
-            )}
-            {candidate.yearsPlaying != null && (
-              <InfoRow label="Years playing" value={yearsPlayingLabel(candidate.yearsPlaying)} />
-            )}
-            {candidate.favoriteShot ? (
-              <InfoRow label="Favorite shot" value={candidate.favoriteShot} />
-            ) : null}
-            {candidate.playStyle ? (
-              <InfoRow label="Play style" value={candidate.playStyle} />
-            ) : null}
           </View>
-
-          {!hasAnyExtra && (
-            <Text style={styles.hint}>
-              {candidate.firstName} hasn't shared more pickleball details yet.
-            </Text>
-          )}
         </ScrollView>
 
         <ActionButtons onDump={onDump} onDink={onDink} disabled={actionsDisabled} />
@@ -193,7 +195,8 @@ const styles = StyleSheet.create({
   },
   flagIcon: { fontSize: 14 },
   closeIcon: { fontSize: 15, color: "#666", fontWeight: "700" },
-  content: { paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8 },
+  content: { paddingTop: 4, paddingBottom: 8 },
+  textContent: { paddingHorizontal: 24, paddingTop: 12 },
   bio: { fontSize: 15, color: "#333", lineHeight: 20, marginBottom: 16 },
   section: { marginTop: 8, marginBottom: 8 },
   sectionLabel: { fontSize: 13, fontWeight: "700", color: "#999", marginBottom: 8 },
