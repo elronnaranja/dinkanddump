@@ -12,7 +12,6 @@ import { loadDiscoveryFilters } from "../../src/services/discoveryPreferences";
 import type { DiscoveryCandidate, DiscoveryFilters } from "../../src/types/domain";
 import { SwipeDeck } from "../../src/components/discovery/SwipeDeck";
 import type { SwipeableCardHandle, SwipeDirection } from "../../src/components/discovery/SwipeableCard";
-import { ActionButtons } from "../../src/components/discovery/ActionButtons";
 import { MoreInfoSheet } from "../../src/components/discovery/MoreInfoSheet";
 import { VideoModal } from "../../src/components/discovery/VideoModal";
 import { EmptyQueueState } from "../../src/components/discovery/EmptyQueueState";
@@ -90,6 +89,7 @@ export default function DiscoverScreen() {
     photos: topPhotos,
     video: topVideo,
     videoUrl: topVideoUrl,
+    videoThumbnailUrl: topVideoThumbnailUrl,
   } = useProfileMedia(topCandidate?.id ?? null);
 
   const [infoVisible, setInfoVisible] = useState(false);
@@ -222,17 +222,18 @@ export default function DiscoverScreen() {
         />
       </View>
 
-      <ActionButtons
-        onDump={() => handleButtonPress("left")}
-        onDink={() => handleButtonPress("right")}
-        disabled={actionPending}
-      />
-
       <MoreInfoSheet
         visible={infoVisible}
         candidate={topCandidate}
+        photos={topPhotos}
+        hasVideo={!!topVideo}
+        videoThumbnailUrl={topVideoThumbnailUrl}
+        onOpenVideo={() => setVideoVisible(true)}
         onClose={() => setInfoVisible(false)}
         onReport={handleOpenReport}
+        onDump={() => handleButtonPress("left")}
+        onDink={() => handleButtonPress("right")}
+        actionsDisabled={actionPending}
       />
       <VideoModal
         visible={videoVisible}
