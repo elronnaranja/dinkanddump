@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { signIn } from "../../src/services/supabase/auth";
 
 export default function SignInScreen() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +25,12 @@ export default function SignInScreen() {
       return;
     }
 
-    router.replace("/");
+    // No manual navigation here: signIn() updates the Supabase auth session,
+    // which RoutingGate (app/_layout.tsx) picks up via onAuthStateChange and
+    // redirects from reactively. A manual router.replace("/") here used to
+    // race that redirect and could target the "index" route after it had
+    // already been torn down by RoutingGate's own navigation, producing a
+    // "REPLACE action not handled by any navigator" error.
   }
 
   return (
