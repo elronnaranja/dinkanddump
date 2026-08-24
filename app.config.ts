@@ -57,6 +57,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
           "Dink & Dump needs microphone access to include audio when you record a highlight video for your profile.",
       },
     ],
+    "expo-video",
   ],
   extra: {
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,

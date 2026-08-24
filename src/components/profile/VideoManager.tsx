@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { View, Text, Image, Pressable, ActivityIndicator, StyleSheet, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as VideoThumbnails from "expo-video-thumbnails";
-import * as FileSystem from "expo-file-system";
+// expo-file-system's new default export (SDK 54) restructured the whole
+// API; /legacy keeps the getInfoAsync({ size: true }) shape this file
+// already uses, avoiding a second migration bundled into the SDK upgrade.
+import * as FileSystem from "expo-file-system/legacy";
 import type { ProfileVideoRow } from "../../types/database";
 import {
   deleteProfileVideo,
@@ -93,7 +96,7 @@ export function VideoManager({ userId, onVideoChange }: VideoManagerProps) {
       }
 
       try {
-        const info = await FileSystem.getInfoAsync(asset.uri, { size: true });
+        const info = await FileSystem.getInfoAsync(asset.uri);
         const size = info.exists ? info.size : undefined;
         if (size && size > MAX_VIDEO_SIZE_BYTES) {
           Alert.alert(

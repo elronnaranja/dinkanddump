@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import { ResizeMode, Video } from "expo-av";
+import { useVideoPlayer, VideoView } from "expo-video";
 
 interface VideoModalProps {
   visible: boolean;
@@ -14,15 +14,26 @@ interface VideoModalProps {
  * badge) — the discovery feed itself never autoplays video. Once opened,
  * playback starts automatically (the tap *is* the explicit play action)
  * with native controls for pause/seek/mute.
+ *
+ * expo-video's player is created once per source (via useVideoPlayer) and
+ * outlives the modal's visibility — play/pause is driven explicitly by the
+ * `visible` effect below rather than an expo-av-style `shouldPlay` prop,
+ * since expo-video has no such declarative playback prop.
  */
 export function VideoModal({ visible, videoUrl, onClose }: VideoModalProps) {
-  const videoRef = useRef<Video>(null);
+  const player = useVideoPlayer(videoUrl, (p) => {
+    p.loop = true;
+  });
 
   useEffect(() => {
-    if (!visible) {
-      videoRef.current?.stopAsync().catch(() => undefined);
+    if (!videoUrl) return;
+    if (visible) {
+      player.play();
+    } else {
+      player.pause();
+      player.currentTime = 0;
     }
-  }, [visible]);
+  }, [visible, videoUrl, player]);
 
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
@@ -32,15 +43,7 @@ export function VideoModal({ visible, videoUrl, onClose }: VideoModalProps) {
         </Pressable>
 
         {videoUrl ? (
-          <Video
-            ref={videoRef}
-            source={{ uri: videoUrl }}
-            style={styles.video}
-            resizeMode={ResizeMode.CONTAIN}
-            useNativeControls
-            shouldPlay={visible}
-            isLooping
-          />
+          <VideoView player={player} style={styles.video} contentFit="contain" nativeControls />
         ) : (
           <Text style={styles.unavailable}>Video unavailable.</Text>
         )}
