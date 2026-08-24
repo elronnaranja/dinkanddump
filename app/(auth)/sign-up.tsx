@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { signUp } from "../../src/services/supabase/auth";
+import { track } from "../../src/services/analytics/track";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function SignUpScreen() {
       return;
     }
 
+    track("signup_completed");
     router.replace("/(onboarding)/basic-profile");
   }
 

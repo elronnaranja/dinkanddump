@@ -124,6 +124,7 @@ export default function ConversationScreen() {
             setActionPending(true);
             try {
               await blockUser(userId, header.otherUserId);
+              track("profile_blocked");
               router.replace("/(tabs)/matches");
             } catch {
               Alert.alert("Couldn't block", "Check your connection and try again.");
@@ -144,6 +145,7 @@ export default function ConversationScreen() {
   async function submitReport(reason: string) {
     if (!header || !userId) return;
     await reportUser(userId, "profile", header.otherUserId, reason);
+    track("profile_reported", { reason });
     setReportSheetVisible(false);
     Alert.alert("Report submitted", "Thanks for letting us know — our team will take a look.");
   }
@@ -151,6 +153,7 @@ export default function ConversationScreen() {
   function handleViewProfile() {
     setActionSheetVisible(false);
     setProfileSheetVisible(true);
+    track("profile_viewed", { source: "chat" });
   }
 
   if (headerLoading || messagesLoading) {

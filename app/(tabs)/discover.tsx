@@ -197,7 +197,10 @@ export default function DiscoverScreen() {
           topHasVideo={!!topVideo}
           onSwiped={handleSwiped}
           onOpenVideo={() => setVideoVisible(true)}
-          onOpenInfo={() => setInfoVisible(true)}
+          onOpenInfo={() => {
+            setInfoVisible(true);
+            track("profile_viewed", { source: "discovery_card" });
+          }}
         />
       </View>
 

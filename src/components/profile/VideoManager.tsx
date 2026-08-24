@@ -21,6 +21,7 @@ import {
   MAX_VIDEO_DURATION_SECONDS,
   MAX_VIDEO_SIZE_BYTES,
 } from "../../utils/media";
+import { track } from "../../services/analytics/track";
 
 interface VideoManagerProps {
   userId: string;
@@ -133,6 +134,7 @@ export function VideoManager({ userId, onVideoChange }: VideoManagerProps) {
       }
 
       await insertProfileVideo(userId, videoPath, thumbnailPath, durationSeconds);
+      track("video_uploaded", { durationSeconds });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Video upload failed. Try again.");

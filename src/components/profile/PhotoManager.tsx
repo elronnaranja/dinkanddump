@@ -22,6 +22,7 @@ import {
   uploadPhoto,
 } from "../../services/supabase/storage";
 import { buildPhotoFileName, compressImage, MAX_PHOTOS } from "../../utils/media";
+import { track } from "../../services/analytics/track";
 
 interface PhotoManagerProps {
   userId: string;
@@ -105,6 +106,7 @@ export function PhotoManager({ userId, onCountChange }: PhotoManagerProps) {
         }
       }
       await insertProfilePhoto(userId, path, position);
+      track("photo_uploaded", { replaced: !!replacePhotoId });
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed. Try again.");

@@ -6,6 +6,7 @@ import { WizardNav } from "../../src/components/ui/WizardNav";
 import { VideoManager } from "../../src/components/profile/VideoManager";
 import { useAuthSession } from "../../src/services/supabase/auth";
 import { setOnboardingCompleted } from "../../src/services/supabase/profiles";
+import { track } from "../../src/services/analytics/track";
 
 export default function VideoScreen() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function VideoScreen() {
     setError(null);
     try {
       await setOnboardingCompleted(session.user.id, true);
+      track("onboarding_completed");
       router.replace("/(tabs)/discover");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't finish onboarding. Try again.");
