@@ -8,21 +8,34 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useAuthSession } from "../src/services/supabase/auth";
 import { getOwnProfile } from "../src/services/supabase/profiles";
 
-// Only (auth) and (onboarding) are gated groups a signed-in, onboarded user
-// must never be left in. Everything else — (tabs), and root-level modal
-// routes like /match/[matchId] and /discovery-preferences that intentionally
-// live outside the tab layout — is legitimate app content once authenticated
-// and onboarded, and must NOT be force-redirected to Discover. An earlier
-// version of this gate treated "not literally inside (tabs)" as "redirect to
-// Discover", which meant every push to /match/[matchId] or
-// /discovery-preferences was immediately reverted before it could render.
-type GatedGroup = "(auth)" | "(onboarding)" | null;
+// Only (auth), (onboarding), and the bare "/" index route are gated cases
+// this gate ever redirects away from. Everything else — (tabs), and
+// root-level modal routes like /match/[matchId] and /discovery-preferences
+// that intentionally live outside the tab layout — is legitimate app
+// content once authenticated and onboarded, and must NOT be
+// force-redirected to Discover. An earlier version of this gate treated
+// "not literally inside (tabs)" as "redirect to Discover", which broke
+// those modal routes; a later version left "/" folded into the same
+// "leave alone" bucket as (tabs), which meant nothing here ever navigated
+// a user off of "/" except app/index.tsx's own competing redirect — a
+// race that resolved differently on a real device than in web testing,
+// occasionally landing a signed-out user on Discover instead of Sign In.
+// Tracking "/" as its own case makes RoutingGate the only thing that ever
+// calls router.replace(), so there's no race left to lose.
+type GatedGroup = "(auth)" | "(onboarding)" | "index" | null;
 
 function useCurrentGatedGroup(): GatedGroup {
   const segments = useSegments();
   const first = segments[0];
   if (first === "(auth)" || first === "(onboarding)") {
     return first;
+  }
+  // The bare "/" route has no group segment at all — checking `!first`
+  // rather than `segments.length === 0` here since this expo-router
+  // version's typed useSegments() return type doesn't allow narrowing on
+  // an empty-array length directly.
+  if (!first) {
+    return "index";
   }
   return null;
 }
@@ -92,11 +105,11 @@ function RoutingGate() {
     }
 
     // Authenticated and onboarded: only redirect away from leftover
-    // (auth)/(onboarding) routes. Anything else — (tabs), or a root-level
-    // modal route like /match/[matchId] or /discovery-preferences — is
-    // legitimate content the user navigated to on purpose and must be left
-    // alone.
-    if (currentGroup === "(auth)" || currentGroup === "(onboarding)") {
+    // (auth)/(onboarding) routes, or the bare "/" index route on a cold
+    // start. Anything else — (tabs), or a root-level modal route like
+    // /match/[matchId] or /discovery-preferences — is legitimate content
+    // the user navigated to on purpose and must be left alone.
+    if (currentGroup === "(auth)" || currentGroup === "(onboarding)" || currentGroup === "index") {
       router.replace("/(tabs)/discover");
     }
   }, [sessionLoading, session, profileLoading, onboardingCompleted, currentGroup, router]);
