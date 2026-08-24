@@ -96,6 +96,7 @@ export function useMatches(userId: string | null): UseMatchesResult {
           lastMessagePreview: lastMessage?.content ?? null,
           lastMessageAt: lastMessage?.created_at ?? null,
           unreadCount,
+          emailVerified: profile?.email_verified ?? false,
         };
       });
 

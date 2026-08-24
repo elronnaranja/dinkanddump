@@ -1,17 +1,48 @@
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { signOut, useAuthSession } from "../../../src/services/supabase/auth";
+import { resendVerificationEmail, signOut, useAuthSession } from "../../../src/services/supabase/auth";
 import { deleteOwnAccount } from "../../../src/services/supabase/accountDeletion";
+import { useProfile } from "../../../src/hooks/useProfile";
+import { VerifiedBadge } from "../../../src/components/ui/VerifiedBadge";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { session } = useAuthSession();
+  const userId = session?.user.id ?? null;
+  const { profile, refresh: refreshProfile } = useProfile(userId);
   const [signingOut, setSigningOut] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [refreshingStatus, setRefreshingStatus] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<{
+    text: string;
+    isError: boolean;
+  } | null>(null);
 
   const busy = signingOut || deleting;
+
+  async function handleResendVerification() {
+    if (!session?.user.email || resending) return;
+    setResending(true);
+    setVerificationMessage(null);
+    const { error } = await resendVerificationEmail(session.user.email);
+    setResending(false);
+    setVerificationMessage(
+      error
+        ? { text: error, isError: true }
+        : { text: "Verification email sent — check your inbox.", isError: false }
+    );
+  }
+
+  async function handleRefreshVerificationStatus() {
+    if (refreshingStatus) return;
+    setRefreshingStatus(true);
+    setVerificationMessage(null);
+    await refreshProfile();
+    setRefreshingStatus(false);
+  }
 
   async function handleSignOut() {
     if (busy) return;
@@ -60,11 +91,65 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Settings</Text>
+        <Pressable onPress={() => router.back()}>
+          <Text style={styles.backLink}>Back to Profile</Text>
+        </Pressable>
+      </View>
 
       {session?.user.email ? (
         <Text style={styles.accountEmail}>Signed in as {session.user.email}</Text>
       ) : null}
+
+      <View style={styles.section}>
+        {profile?.email_verified ? (
+          <View style={styles.row}>
+            <View style={styles.verifiedRow}>
+              <VerifiedBadge verified size={16} />
+              <Text style={styles.verifiedText}>Email verified</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.verificationBlock}>
+            <Text style={styles.verificationHint}>
+              Verify your email to unlock more photos.
+            </Text>
+            {verificationMessage ? (
+              <Text
+                style={[
+                  styles.verificationMessage,
+                  verificationMessage.isError && styles.verificationMessageError,
+                ]}
+              >
+                {verificationMessage.text}
+              </Text>
+            ) : null}
+            <Pressable
+              style={styles.row}
+              onPress={handleResendVerification}
+              disabled={resending}
+            >
+              {resending ? (
+                <ActivityIndicator size="small" />
+              ) : (
+                <Text style={styles.rowText}>Resend verification email</Text>
+              )}
+            </Pressable>
+            <Pressable
+              style={styles.row}
+              onPress={handleRefreshVerificationStatus}
+              disabled={refreshingStatus}
+            >
+              {refreshingStatus ? (
+                <ActivityIndicator size="small" />
+              ) : (
+                <Text style={styles.rowText}>I've verified — refresh</Text>
+              )}
+            </Pressable>
+          </View>
+        )}
+      </View>
 
       <View style={styles.section}>
         <Pressable style={styles.row} onPress={handleSignOut} disabled={busy}>
@@ -102,8 +187,32 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fafafa", paddingTop: 24 },
-  title: { fontSize: 24, fontWeight: "700", paddingHorizontal: 20, marginBottom: 4 },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 4,
+  },
+  title: { fontSize: 24, fontWeight: "700" },
+  backLink: { color: "#1a7f37", fontWeight: "600", fontSize: 15 },
   accountEmail: { fontSize: 13, color: "#999", paddingHorizontal: 20, marginBottom: 24 },
+  verifiedRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  verifiedText: { fontSize: 16, color: "#222", fontWeight: "500" },
+  verificationBlock: { paddingBottom: 4 },
+  verificationHint: {
+    fontSize: 13,
+    color: "#666",
+    paddingHorizontal: 16,
+    paddingTop: 14,
+  },
+  verificationMessage: {
+    fontSize: 12,
+    color: "#1a7f37",
+    paddingHorizontal: 16,
+    paddingTop: 6,
+  },
+  verificationMessageError: { color: "#c0392b" },
   section: {
     backgroundColor: "#fff",
     marginHorizontal: 20,

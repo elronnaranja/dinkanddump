@@ -12,6 +12,7 @@ import {
 import type { PublicProfileRow } from "../../types/database";
 import { getPublicProfile, listProfilePhotos } from "../../services/supabase/profiles";
 import { getSignedPhotoUrl } from "../../services/supabase/storage";
+import { VerifiedBadge } from "../ui/VerifiedBadge";
 import {
   dominantHandLabel,
   gamePreferenceLabel,
@@ -97,9 +98,12 @@ export function OtherProfileSheet({ visible, userId, onClose }: OtherProfileShee
               </View>
             )}
 
-            <Text style={styles.name}>
-              {profile.first_name}, {profile.age}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>
+                {profile.first_name}, {profile.age}
+              </Text>
+              <VerifiedBadge verified={profile.email_verified} size={18} />
+            </View>
             {profile.city || profile.region ? (
               <Text style={styles.location}>
                 {[profile.city, profile.region].filter(Boolean).join(", ")}
@@ -178,6 +182,7 @@ const styles = StyleSheet.create({
   },
   photoPlaceholder: { alignItems: "center", justifyContent: "center" },
   photoPlaceholderText: { color: "#999", fontWeight: "700" },
+  nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
   name: { fontSize: 22, fontWeight: "700", textAlign: "center" },
   location: { fontSize: 14, color: "#666", textAlign: "center", marginTop: 4 },
   bio: { fontSize: 15, color: "#333", lineHeight: 20, marginTop: 14 },

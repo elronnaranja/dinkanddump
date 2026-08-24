@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { useAuthSession } from "../../../src/services/supabase/auth";
 import { useProfile } from "../../../src/hooks/useProfile";
 import { useProfileMedia } from "../../../src/hooks/useProfileMedia";
+import { VerifiedBadge } from "../../../src/components/ui/VerifiedBadge";
 import { calculateAge } from "../../../src/utils/age";
 import {
   dominantHandLabel,
@@ -119,9 +120,12 @@ export default function ProfileScreen() {
       )}
 
       <View style={styles.section}>
-        <Text style={styles.name}>
-          {profile.first_name}, {age}
-        </Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.name}>
+            {profile.first_name}, {age}
+          </Text>
+          <VerifiedBadge verified={profile.email_verified} size={18} />
+        </View>
         {location ? <Text style={styles.location}>{location}</Text> : null}
         {profile.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
       </View>
@@ -183,6 +187,7 @@ const styles = StyleSheet.create({
   videoThumb: { width: "100%", height: 200, borderRadius: 10, backgroundColor: "#eee" },
   section: { paddingHorizontal: 20, marginTop: 20 },
   sectionLabel: { fontSize: 13, fontWeight: "700", color: "#999", marginBottom: 8 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   name: { fontSize: 24, fontWeight: "700" },
   location: { fontSize: 15, color: "#666", marginTop: 4 },
   bio: { fontSize: 15, color: "#333", marginTop: 10, lineHeight: 20 },

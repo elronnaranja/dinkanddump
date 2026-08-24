@@ -133,6 +133,7 @@ export interface MatchListItem {
   lastMessagePreview: string | null;
   lastMessageAt: string | null;
   unreadCount: number;
+  emailVerified: boolean;
 }
 
 export interface ChatMessage {

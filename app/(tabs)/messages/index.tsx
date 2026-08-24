@@ -14,6 +14,7 @@ import { useAuthSession } from "../../../src/services/supabase/auth";
 import { useMatches } from "../../../src/hooks/useMatches";
 import type { MatchListItem } from "../../../src/types/domain";
 import { formatRelativeShort } from "../../../src/utils/time";
+import { VerifiedBadge } from "../../../src/components/ui/VerifiedBadge";
 
 /**
  * Design decision (Matches vs Messages): both screens are built on the same
@@ -124,9 +125,12 @@ function ConversationRow({ match, onPress }: { match: MatchListItem; onPress: ()
 
       <View style={styles.rowBody}>
         <View style={styles.rowTop}>
-          <Text style={[styles.name, unread && styles.nameUnread]} numberOfLines={1}>
-            {match.otherFirstName}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={[styles.name, unread && styles.nameUnread]} numberOfLines={1}>
+              {match.otherFirstName}
+            </Text>
+            <VerifiedBadge verified={match.emailVerified} size={13} />
+          </View>
           {match.lastMessageAt ? (
             <Text style={[styles.timestamp, unread && styles.timestampUnread]}>
               {formatRelativeShort(match.lastMessageAt)}
@@ -201,6 +205,7 @@ const styles = StyleSheet.create({
   photoPlaceholderText: { color: "#999", fontWeight: "700", fontSize: 18 },
   rowBody: { flex: 1 },
   rowTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1 },
   name: { fontSize: 16, fontWeight: "600", color: "#222", flexShrink: 1 },
   nameUnread: { fontWeight: "800" },
   timestamp: { fontSize: 12, color: "#999", marginLeft: 8 },

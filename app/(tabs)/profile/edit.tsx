@@ -24,6 +24,8 @@ import {
   PLAYING_FREQUENCY_OPTIONS,
   YEARS_PLAYING_OPTIONS,
   GENDER_OPTIONS,
+  FAVORITE_SHOT_OPTIONS,
+  PLAY_STYLE_OPTIONS,
 } from "../../../src/constants/pickleballOptions";
 import type {
   DominantHand,
@@ -201,7 +203,7 @@ export default function EditProfileScreen() {
       </View>
 
       <Text style={styles.sectionLabel}>Photos</Text>
-      <PhotoManager userId={userId} />
+      <PhotoManager userId={userId} emailVerified={profile.email_verified} />
 
       <Text style={styles.sectionLabel}>Highlight video</Text>
       <VideoManager userId={userId} />
@@ -297,9 +299,19 @@ export default function EditProfileScreen() {
         onChangeText={setDuprRating}
       />
       <Text style={styles.label}>Favorite shot</Text>
-      <TextInput style={styles.input} value={favoriteShot} onChangeText={setFavoriteShot} />
+      <SegmentedChoice
+        options={FAVORITE_SHOT_OPTIONS}
+        value={favoriteShot || null}
+        onChange={setFavoriteShot}
+        columns={2}
+      />
       <Text style={styles.label}>Play style</Text>
-      <TextInput style={styles.input} value={playStyle} onChangeText={setPlayStyle} />
+      <SegmentedChoice
+        options={PLAY_STYLE_OPTIONS}
+        value={playStyle || null}
+        onChange={setPlayStyle}
+        columns={2}
+      />
 
       {saveError && <Text style={styles.error}>{saveError}</Text>}
       {saved && <Text style={styles.success}>Saved.</Text>}

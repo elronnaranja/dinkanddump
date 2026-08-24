@@ -11,6 +11,8 @@ import {
   DOMINANT_HAND_OPTIONS,
   PLAYING_FREQUENCY_OPTIONS,
   YEARS_PLAYING_OPTIONS,
+  FAVORITE_SHOT_OPTIONS,
+  PLAY_STYLE_OPTIONS,
 } from "../../src/constants/pickleballOptions";
 import { useOnboarding } from "../../src/context/OnboardingContext";
 import { useAuthSession } from "../../src/services/supabase/auth";
@@ -137,19 +139,19 @@ export default function PickleballProfileScreen() {
       </Text>
 
       <Text style={styles.label}>Favorite shot (optional)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="e.g. Third-shot drop"
-        value={state.favoriteShot}
-        onChangeText={(v) => update({ favoriteShot: v })}
+      <SegmentedChoice
+        options={FAVORITE_SHOT_OPTIONS}
+        value={state.favoriteShot || null}
+        onChange={(v) => update({ favoriteShot: v })}
+        columns={2}
       />
 
       <Text style={styles.label}>Play style (optional)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="e.g. Aggressive net play"
-        value={state.playStyle}
-        onChangeText={(v) => update({ playStyle: v })}
+      <SegmentedChoice
+        options={PLAY_STYLE_OPTIONS}
+        value={state.playStyle || null}
+        onChange={(v) => update({ playStyle: v })}
+        columns={2}
       />
 
       {error && <Text style={styles.error}>{error}</Text>}

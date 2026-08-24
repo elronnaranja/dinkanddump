@@ -5,6 +5,7 @@ import type { DiscoveryCandidate } from "../../types/domain";
 import type { ProfilePhotoWithUrl } from "../../hooks/useProfileMedia";
 import { formatDistanceKm } from "../../utils/distance";
 import { gamePreferenceLabel, skillLevelLabel } from "../../constants/pickleballOptions";
+import { VerifiedBadge } from "../ui/VerifiedBadge";
 
 interface DiscoveryCardProps {
   candidate: DiscoveryCandidate;
@@ -98,9 +99,12 @@ export function DiscoveryCard({
       />
 
       <View style={styles.infoOverlay} pointerEvents="box-none">
-        <Text style={styles.nameLine}>
-          {candidate.firstName}, {candidate.age}
-        </Text>
+        <View style={styles.nameRow}>
+          <Text style={styles.nameLine}>
+            {candidate.firstName}, {candidate.age}
+          </Text>
+          <VerifiedBadge verified={candidate.emailVerified} size={20} />
+        </View>
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{skillLevelLabel(candidate.skillLevel)}</Text>
@@ -165,6 +169,7 @@ const styles = StyleSheet.create({
     height: "45%",
   },
   infoOverlay: { position: "absolute", left: 20, right: 20, bottom: 20 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   nameLine: { color: "#fff", fontSize: 26, fontWeight: "800" },
   badgeRow: { flexDirection: "row", gap: 8, marginTop: 8 },
   badge: {

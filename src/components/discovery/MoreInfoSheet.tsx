@@ -8,11 +8,13 @@ import {
   skillLevelLabel,
   yearsPlayingLabel,
 } from "../../constants/pickleballOptions";
+import { VerifiedBadge } from "../ui/VerifiedBadge";
 
 interface MoreInfoSheetProps {
   visible: boolean;
   candidate: DiscoveryCandidate | null;
   onClose: () => void;
+  onReport: () => void;
 }
 
 /**
@@ -22,7 +24,7 @@ interface MoreInfoSheetProps {
  * the minimal card face: bio, play style, frequency, years playing, DUPR,
  * dominant hand.
  */
-export function MoreInfoSheet({ visible, candidate, onClose }: MoreInfoSheetProps) {
+export function MoreInfoSheet({ visible, candidate, onClose, onReport }: MoreInfoSheetProps) {
   if (!candidate) return null;
 
   const hasAnyExtra =
@@ -39,9 +41,12 @@ export function MoreInfoSheet({ visible, candidate, onClose }: MoreInfoSheetProp
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.name}>
-            {candidate.firstName}, {candidate.age}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.name}>
+              {candidate.firstName}, {candidate.age}
+            </Text>
+            <VerifiedBadge verified={candidate.emailVerified} size={18} />
+          </View>
 
           {candidate.bio ? <Text style={styles.bio}>{candidate.bio}</Text> : null}
 
@@ -87,6 +92,9 @@ export function MoreInfoSheet({ visible, candidate, onClose }: MoreInfoSheetProp
         <Pressable style={styles.closeButton} onPress={onClose}>
           <Text style={styles.closeButtonText}>Close</Text>
         </Pressable>
+        <Pressable style={styles.reportButton} onPress={onReport}>
+          <Text style={styles.reportButtonText}>Report {candidate.firstName}</Text>
+        </Pressable>
       </View>
     </Modal>
   );
@@ -119,7 +127,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   content: { paddingHorizontal: 24, paddingBottom: 12 },
-  name: { fontSize: 22, fontWeight: "700", marginBottom: 8 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 },
+  name: { fontSize: 22, fontWeight: "700" },
   bio: { fontSize: 15, color: "#333", lineHeight: 20, marginBottom: 16 },
   section: { marginTop: 8, marginBottom: 8 },
   sectionLabel: { fontSize: 13, fontWeight: "700", color: "#999", marginBottom: 8 },
@@ -142,4 +151,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   closeButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  reportButton: { marginHorizontal: 24, marginBottom: 16, alignItems: "center" },
+  reportButtonText: { color: "#c0392b", fontSize: 13, fontWeight: "600" },
 });

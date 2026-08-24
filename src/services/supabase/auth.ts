@@ -26,6 +26,11 @@ export async function resetPassword(email: string): Promise<AuthResult> {
   return { error: error?.message ?? null };
 }
 
+export async function resendVerificationEmail(email: string): Promise<AuthResult> {
+  const { error } = await supabase.auth.resend({ type: "signup", email });
+  return { error: error?.message ?? null };
+}
+
 export interface AuthSessionState {
   session: Session | null;
   loading: boolean;

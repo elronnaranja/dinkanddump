@@ -6,12 +6,14 @@ import { WizardNav } from "../../src/components/ui/WizardNav";
 import { PhotoManager } from "../../src/components/profile/PhotoManager";
 import { useOnboarding } from "../../src/context/OnboardingContext";
 import { useAuthSession } from "../../src/services/supabase/auth";
+import { useProfile } from "../../src/hooks/useProfile";
 
 export default function PhotosScreen() {
   const router = useRouter();
   const { session } = useAuthSession();
   const { profileCreated } = useOnboarding();
   const [photoCount, setPhotoCount] = useState(0);
+  const { profile } = useProfile(session?.user.id ?? null);
 
   if (!session) {
     return (
@@ -40,7 +42,11 @@ export default function PhotosScreen() {
         is your primary photo.
       </Text>
 
-      <PhotoManager userId={session.user.id} onCountChange={setPhotoCount} />
+      <PhotoManager
+        userId={session.user.id}
+        emailVerified={!!profile?.email_verified}
+        onCountChange={setPhotoCount}
+      />
 
       <WizardNav
         onBack={() => router.back()}

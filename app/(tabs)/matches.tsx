@@ -17,6 +17,7 @@ import type { MatchListItem } from "../../src/types/domain";
 import { formatDistanceKm } from "../../src/utils/distance";
 import { formatRelativeShort } from "../../src/utils/time";
 import { skillLevelLabel } from "../../src/constants/pickleballOptions";
+import { VerifiedBadge } from "../../src/components/ui/VerifiedBadge";
 
 /**
  * Full list of the current user's active matches. Distinct from the
@@ -132,10 +133,13 @@ function MatchRow({ match, onPress }: { match: MatchListItem; onPress: () => voi
 
       <View style={styles.rowBody}>
         <View style={styles.rowTop}>
-          <Text style={styles.name} numberOfLines={1}>
-            {match.otherFirstName}
-            {match.otherAge != null ? `, ${match.otherAge}` : ""}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.name} numberOfLines={1}>
+              {match.otherFirstName}
+              {match.otherAge != null ? `, ${match.otherAge}` : ""}
+            </Text>
+            <VerifiedBadge verified={match.emailVerified} size={13} />
+          </View>
           {match.lastMessageAt ? (
             <Text style={styles.timestamp}>{formatRelativeShort(match.lastMessageAt)}</Text>
           ) : null}
@@ -211,6 +215,7 @@ const styles = StyleSheet.create({
   photoPlaceholderText: { color: "#999", fontWeight: "700", fontSize: 18 },
   rowBody: { flex: 1 },
   rowTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 4, flexShrink: 1 },
   name: { fontSize: 16, fontWeight: "700", color: "#222", flexShrink: 1 },
   timestamp: { fontSize: 12, color: "#999", marginLeft: 8 },
   meta: { fontSize: 12, color: "#1a7f37", marginTop: 2 },

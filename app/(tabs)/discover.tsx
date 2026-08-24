@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useAuthSession } from "../../src/services/supabase/auth";
 import { DEFAULT_DISCOVERY_FILTERS, useDiscoveryQueue } from "../../src/hooks/useDiscoveryQueue";
 import { useProfileMedia } from "../../src/hooks/useProfileMedia";
 import { recordSwipe } from "../../src/services/supabase/swipes";
+import { reportUser } from "../../src/services/supabase/safety";
 import { track } from "../../src/services/analytics/track";
 import { loadDiscoveryFilters } from "../../src/services/discoveryPreferences";
 import type { DiscoveryCandidate, DiscoveryFilters } from "../../src/types/domain";
@@ -14,6 +15,7 @@ import { ActionButtons } from "../../src/components/discovery/ActionButtons";
 import { MoreInfoSheet } from "../../src/components/discovery/MoreInfoSheet";
 import { VideoModal } from "../../src/components/discovery/VideoModal";
 import { EmptyQueueState } from "../../src/components/discovery/EmptyQueueState";
+import { ReportSheet } from "../../src/components/chat/ReportSheet";
 
 function filtersEqual(a: DiscoveryFilters, b: DiscoveryFilters): boolean {
   return (
@@ -91,6 +93,7 @@ export default function DiscoverScreen() {
 
   const [infoVisible, setInfoVisible] = useState(false);
   const [videoVisible, setVideoVisible] = useState(false);
+  const [reportVisible, setReportVisible] = useState(false);
   const [actionPending, setActionPending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -142,6 +145,19 @@ export default function DiscoverScreen() {
 
   function openFilters() {
     router.push("/discovery-preferences");
+  }
+
+  function handleOpenReport() {
+    setInfoVisible(false);
+    setReportVisible(true);
+  }
+
+  async function submitReport(reason: string) {
+    if (!topCandidate || !userId) return;
+    await reportUser(userId, "profile", topCandidate.id, reason);
+    track("profile_reported", { reason });
+    setReportVisible(false);
+    Alert.alert("Report submitted", "Thanks for letting us know — our team will take a look.");
   }
 
   if (sessionLoading || !filtersReady || (queueLoading && candidates.length === 0)) {
@@ -215,11 +231,17 @@ export default function DiscoverScreen() {
         visible={infoVisible}
         candidate={topCandidate}
         onClose={() => setInfoVisible(false)}
+        onReport={handleOpenReport}
       />
       <VideoModal
         visible={videoVisible}
         videoUrl={topVideoUrl}
         onClose={() => setVideoVisible(false)}
+      />
+      <ReportSheet
+        visible={reportVisible}
+        onClose={() => setReportVisible(false)}
+        onSubmit={submitReport}
       />
     </View>
   );

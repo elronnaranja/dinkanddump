@@ -21,11 +21,21 @@ import {
   getSignedPhotoUrls,
   uploadPhoto,
 } from "../../services/supabase/storage";
+import { moderatePhoto } from "../../services/supabase/moderation";
 import { buildPhotoFileName, compressImage, MAX_PHOTOS } from "../../utils/media";
 import { track } from "../../services/analytics/track";
 
 interface PhotoManagerProps {
   userId: string;
+  /**
+   * Whether this user's email is verified — profile_photos enforces a
+   * server-side gate (migration 0020) blocking anyone unverified from
+   * having more than 1 photo, checked against auth.users directly at
+   * insert time. This prop lets pickAndUpload short-circuit with a clear
+   * message before even opening the picker, rather than letting the user
+   * hit the raw Postgres error after picking a photo.
+   */
+  emailVerified: boolean;
   onCountChange?: (count: number) => void;
 }
 
@@ -35,7 +45,7 @@ interface PhotoItem {
   uploading?: boolean;
 }
 
-export function PhotoManager({ userId, onCountChange }: PhotoManagerProps) {
+export function PhotoManager({ userId, emailVerified, onCountChange }: PhotoManagerProps) {
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +72,13 @@ export function PhotoManager({ userId, onCountChange }: PhotoManagerProps) {
 
   async function pickAndUpload(replacePhotoId?: string) {
     if (!replacePhotoId && photos.length >= MAX_PHOTOS) return;
+    if (!replacePhotoId && !emailVerified && photos.length >= 1) {
+      Alert.alert(
+        "Verify your email first",
+        "Add more photos once you've verified your email address. You can resend the verification email from Settings."
+      );
+      return;
+    }
 
     setError(null);
     // The whole flow — permission request, launching the picker, and the
@@ -97,6 +114,13 @@ export function PhotoManager({ userId, onCountChange }: PhotoManagerProps) {
       const compressedUri = await compressImage(result.assets[0].uri);
       const fileName = buildPhotoFileName("jpg");
       const path = await uploadPhoto(userId, compressedUri, fileName);
+
+      const moderation = await moderatePhoto(path);
+      if (!moderation.approved) {
+        await deleteStoragePhoto(path).catch(() => undefined);
+        setError(moderation.reason ?? "This photo was rejected. Please choose a different photo.");
+        return;
+      }
 
       if (replacePhotoId) {
         const existing = photos.find((p) => p.row.id === replacePhotoId);
