@@ -44,7 +44,12 @@ export function useProfileMedia(userId: string | null): UseProfileMediaResult {
       const urls = await getSignedPhotoUrls(photoRows.map((p) => p.storage_path));
       setPhotos(photoRows.map((row) => ({ row, url: urls[row.storage_path] ?? null })));
 
-      setVideo(videoRow);
+      // `video` (and therefore `hasVideo` everywhere it's derived, e.g.
+      // DiscoveryCard's video badge and MediaSlider's video slide) is only
+      // set once its signed URL has actually resolved - setting it earlier
+      // made the video badge tappable before there was a URL to play,
+      // opening VideoModal with videoUrl still null ("Video unavailable")
+      // even though the video genuinely existed.
       if (videoRow) {
         const [vUrl, tUrl] = await Promise.all([
           getSignedVideoUrl(videoRow.storage_path),
@@ -52,7 +57,9 @@ export function useProfileMedia(userId: string | null): UseProfileMediaResult {
         ]);
         setVideoUrl(vUrl);
         setVideoThumbnailUrl(tUrl);
+        setVideo(vUrl ? videoRow : null);
       } else {
+        setVideo(null);
         setVideoUrl(null);
         setVideoThumbnailUrl(null);
       }
