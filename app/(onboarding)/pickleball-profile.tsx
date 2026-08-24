@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput, ScrollView, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StepProgressBar } from "../../src/components/ui/StepProgressBar";
 import { WizardNav } from "../../src/components/ui/WizardNav";
@@ -19,6 +20,7 @@ import { useAuthSession } from "../../src/services/supabase/auth";
 import { upsertProfile } from "../../src/services/supabase/profiles";
 
 export default function PickleballProfileScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { session } = useAuthSession();
   const { state, update, setProfileCreated } = useOnboarding();
@@ -74,7 +76,7 @@ export default function PickleballProfileScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}>
       <StepProgressBar currentStep={3} totalSteps={5} label="Pickleball profile" />
       <Text style={styles.title}>Your pickleball profile</Text>
 

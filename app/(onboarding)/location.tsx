@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 import { StepProgressBar } from "../../src/components/ui/StepProgressBar";
@@ -7,6 +8,7 @@ import { WizardNav } from "../../src/components/ui/WizardNav";
 import { useOnboarding } from "../../src/context/OnboardingContext";
 
 export default function LocationScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { state, update } = useOnboarding();
   const [requesting, setRequesting] = useState(false);
@@ -60,7 +62,7 @@ export default function LocationScreen() {
       : state.city.trim().length > 0 && state.country.trim().length > 0;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}>
       <StepProgressBar currentStep={2} totalSteps={5} label="Location" />
       <Text style={styles.title}>Where do you play?</Text>
       <Text style={styles.body}>

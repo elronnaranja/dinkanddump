@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../../src/services/supabase/auth";
 import { useProfile } from "../../../src/hooks/useProfile";
 import { updateProfile, isUsernameAvailable } from "../../../src/services/supabase/profiles";
@@ -39,6 +40,7 @@ import type {
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { session } = useAuthSession();
   const userId = session?.user.id ?? null;
   const { profile, loading, error: loadError, refresh } = useProfile(userId);
@@ -194,7 +196,7 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Edit profile</Text>
         <Pressable onPress={() => router.back()}>

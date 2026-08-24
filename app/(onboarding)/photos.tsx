@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StepProgressBar } from "../../src/components/ui/StepProgressBar";
 import { WizardNav } from "../../src/components/ui/WizardNav";
@@ -9,6 +10,7 @@ import { useAuthSession } from "../../src/services/supabase/auth";
 import { useProfile } from "../../src/hooks/useProfile";
 
 export default function PhotosScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { session } = useAuthSession();
   const { profileCreated } = useOnboarding();
@@ -34,7 +36,7 @@ export default function PhotosScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}>
       <StepProgressBar currentStep={4} totalSteps={5} label="Photos" />
       <Text style={styles.title}>Add photos</Text>
       <Text style={styles.body}>

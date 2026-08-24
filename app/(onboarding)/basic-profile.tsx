@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StepProgressBar } from "../../src/components/ui/StepProgressBar";
 import { WizardNav } from "../../src/components/ui/WizardNav";
 import { SegmentedChoice } from "../../src/components/ui/SegmentedChoice";
@@ -21,6 +22,7 @@ const USERNAME_PATTERN = /^[a-zA-Z0-9_]{3,30}$/;
 
 export default function BasicProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { state, update } = useOnboarding();
 
   const [usernameStatus, setUsernameStatus] = useState<
@@ -69,7 +71,7 @@ export default function BasicProfileScreen() {
     !dobError;
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}>
       <StepProgressBar currentStep={1} totalSteps={5} label="Basic profile" />
       <Text style={styles.title}>Tell us about you</Text>
 

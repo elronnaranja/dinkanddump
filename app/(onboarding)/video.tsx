@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StepProgressBar } from "../../src/components/ui/StepProgressBar";
 import { WizardNav } from "../../src/components/ui/WizardNav";
@@ -9,6 +10,7 @@ import { setOnboardingCompleted } from "../../src/services/supabase/profiles";
 import { track } from "../../src/services/analytics/track";
 
 export default function VideoScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { session } = useAuthSession();
   const [finishing, setFinishing] = useState(false);
@@ -38,7 +40,7 @@ export default function VideoScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top + 24 }]}>
       <StepProgressBar currentStep={5} totalSteps={5} label="Highlight video" />
       <Text style={styles.title}>Add a highlight video</Text>
       <Text style={styles.body}>
