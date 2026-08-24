@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ProfilePhotoRow, ProfileVideoRow } from "../types/database";
 import { getProfileVideo, listProfilePhotos } from "../services/supabase/profiles";
-import { getSignedPhotoUrls, getSignedVideoUrl } from "../services/supabase/storage";
+import { getSignedPhotoUrl, getSignedPhotoUrls, getSignedVideoUrl } from "../services/supabase/storage";
 
 export interface ProfilePhotoWithUrl {
   row: ProfilePhotoRow;
@@ -48,7 +48,7 @@ export function useProfileMedia(userId: string | null): UseProfileMediaResult {
       if (videoRow) {
         const [vUrl, tUrl] = await Promise.all([
           getSignedVideoUrl(videoRow.storage_path),
-          videoRow.thumbnail_path ? getSignedVideoUrl(videoRow.thumbnail_path) : null,
+          videoRow.thumbnail_path ? getSignedPhotoUrl(videoRow.thumbnail_path) : null,
         ]);
         setVideoUrl(vUrl);
         setVideoThumbnailUrl(tUrl);

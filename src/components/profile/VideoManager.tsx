@@ -13,7 +13,9 @@ import {
   insertProfileVideo,
 } from "../../services/supabase/profiles";
 import {
+  deletePhoto as deleteStoragePhoto,
   deleteVideo as deleteStorageVideo,
+  getSignedPhotoUrl,
   getSignedVideoUrl,
   uploadPhoto,
   uploadVideo,
@@ -46,7 +48,7 @@ export function VideoManager({ userId, onVideoChange }: VideoManagerProps) {
       setVideo(row);
       onVideoChange?.(!!row);
       if (row?.thumbnail_path) {
-        const url = await getSignedVideoUrl(row.thumbnail_path);
+        const url = await getSignedPhotoUrl(row.thumbnail_path);
         setThumbnailUrl(url);
       } else {
         setThumbnailUrl(null);
@@ -117,7 +119,7 @@ export function VideoManager({ userId, onVideoChange }: VideoManagerProps) {
       if (video) {
         await deleteStorageVideo(video.storage_path).catch(() => undefined);
         if (video.thumbnail_path) {
-          await deleteStorageVideo(video.thumbnail_path).catch(() => undefined);
+          await deleteStoragePhoto(video.thumbnail_path).catch(() => undefined);
         }
         await deleteProfileVideo(video.id);
       }
@@ -153,7 +155,7 @@ export function VideoManager({ userId, onVideoChange }: VideoManagerProps) {
     try {
       await deleteStorageVideo(video.storage_path).catch(() => undefined);
       if (video.thumbnail_path) {
-        await deleteStorageVideo(video.thumbnail_path).catch(() => undefined);
+        await deleteStoragePhoto(video.thumbnail_path).catch(() => undefined);
       }
       await deleteProfileVideo(video.id);
       await load();
