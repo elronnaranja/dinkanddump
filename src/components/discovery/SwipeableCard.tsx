@@ -155,11 +155,7 @@ export const SwipeableCard = forwardRef<SwipeableCardHandle, SwipeableCardProps>
 );
 
 const styles = StyleSheet.create({
-  cardWrap: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  cardWrap: { ...StyleSheet.absoluteFillObject },
   stamp: {
     position: "absolute",
     top: 48,
