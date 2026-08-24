@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../src/services/supabase/auth";
 import { useMatchCelebration } from "../../src/hooks/useMatchCelebration";
 import { getConversationForMatch } from "../../src/services/supabase/matches";
@@ -17,6 +18,7 @@ import { getConversationForMatch } from "../../src/services/supabase/matches";
  */
 export default function MatchCelebrationScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{
     matchId: string;
     otherUserId?: string;
@@ -79,7 +81,12 @@ export default function MatchCelebrationScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top + 32, paddingBottom: insets.bottom + 32 },
+      ]}
+    >
       <View style={styles.badge}>
         <Text style={styles.badgeText}>MATCH</Text>
       </View>

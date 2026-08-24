@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../../src/services/supabase/auth";
 import { useChatHeader } from "../../../src/hooks/useChatHeader";
 import { useConversation } from "../../../src/hooks/useConversation";
@@ -36,6 +37,7 @@ import { OtherProfileSheet } from "../../../src/components/chat/OtherProfileShee
  */
 export default function ConversationScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ conversationId: string }>();
   const conversationId = params.conversationId ?? null;
 
@@ -183,7 +185,7 @@ export default function ConversationScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={12}>
           <Text style={styles.backButtonText}>{"‹"}</Text>
         </Pressable>
@@ -247,7 +249,7 @@ export default function ConversationScreen() {
       ) : null}
 
       {isActive ? (
-        <View style={styles.inputRow}>
+        <View style={[styles.inputRow, { paddingBottom: insets.bottom + 8 }]}>
           <TextInput
             style={styles.input}
             value={draft}
@@ -311,7 +313,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 12,
-    paddingTop: 8,
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",

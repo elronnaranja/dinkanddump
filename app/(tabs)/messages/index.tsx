@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../../src/services/supabase/auth";
 import { useMatches } from "../../../src/hooks/useMatches";
 import type { MatchListItem } from "../../../src/types/domain";
@@ -35,6 +36,7 @@ import { VerifiedBadge } from "../../../src/components/ui/VerifiedBadge";
  */
 export default function MessagesListScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { session } = useAuthSession();
   const userId = session?.user.id ?? null;
   const { matches, loading, error, refresh } = useMatches(userId);
@@ -97,7 +99,7 @@ export default function MessagesListScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Messages</Text>
+      <Text style={[styles.header, { paddingTop: insets.top + 16 }]}>Messages</Text>
       <FlatList
         data={conversations}
         keyExtractor={(item) => item.id}
@@ -166,7 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     paddingHorizontal: 20,
-    paddingTop: 16,
     paddingBottom: 8,
   },
   listContent: { paddingBottom: 24 },

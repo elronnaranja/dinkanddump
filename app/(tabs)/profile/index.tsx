@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../../src/services/supabase/auth";
 import { useProfile } from "../../../src/hooks/useProfile";
 import { useProfileMedia } from "../../../src/hooks/useProfileMedia";
@@ -28,6 +29,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { session } = useAuthSession();
   const userId = session?.user.id ?? null;
   const { profile, loading: profileLoading, error: profileError } = useProfile(userId);
@@ -69,7 +71,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <Text style={styles.title}>My profile</Text>
         <View style={styles.headerActions}>
           <Pressable onPress={() => router.push("/(tabs)/profile/edit")}>
@@ -170,7 +172,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 16,
     paddingBottom: 8,
   },
   title: { fontSize: 20, fontWeight: "700" },

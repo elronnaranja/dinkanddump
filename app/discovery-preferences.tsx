@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SegmentedChoice, type ChoiceOption } from "../src/components/ui/SegmentedChoice";
 import { DISTANCE_KM_OPTIONS, GENDER_PREFERENCE_OPTIONS } from "../src/constants/discoveryOptions";
 import {
@@ -53,6 +54,7 @@ function skillIndex(level: SkillLevel): number {
  */
 export default function DiscoveryPreferencesScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [filters, setFilters] = useState<DiscoveryFilters>(DEFAULT_DISCOVERY_FILTERS);
   const [loading, setLoading] = useState(true);
@@ -128,7 +130,7 @@ export default function DiscoveryPreferencesScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <Text style={styles.title}>Discovery Preferences</Text>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Text style={styles.closeButton}>Close</Text>
@@ -194,7 +196,11 @@ export default function DiscoveryPreferencesScreen() {
       </ScrollView>
 
       <Pressable
-        style={[styles.applyButton, saving && styles.applyButtonDisabled]}
+        style={[
+          styles.applyButton,
+          { marginBottom: insets.bottom + 24 },
+          saving && styles.applyButtonDisabled,
+        ]}
         onPress={handleApply}
         disabled={saving}
       >
@@ -221,7 +227,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
@@ -238,7 +243,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     marginHorizontal: 20,
-    marginBottom: 24,
   },
   applyButtonDisabled: { opacity: 0.6 },
   applyButtonText: { color: "#fff", fontWeight: "700", fontSize: 16 },

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { resendVerificationEmail, signOut, useAuthSession } from "../../../src/services/supabase/auth";
 import { deleteOwnAccount } from "../../../src/services/supabase/accountDeletion";
 import { useProfile } from "../../../src/hooks/useProfile";
@@ -8,6 +9,7 @@ import { VerifiedBadge } from "../../../src/components/ui/VerifiedBadge";
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { session } = useAuthSession();
   const userId = session?.user.id ?? null;
   const { profile, refresh: refreshProfile } = useProfile(userId);
@@ -90,7 +92,7 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + 24 }]}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Settings</Text>
         <Pressable onPress={() => router.back()}>
@@ -186,7 +188,7 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fafafa", paddingTop: 24 },
+  container: { flex: 1, backgroundColor: "#fafafa" },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",

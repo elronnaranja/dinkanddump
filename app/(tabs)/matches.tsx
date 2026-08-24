@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../src/services/supabase/auth";
 import { useMatches } from "../../src/hooks/useMatches";
 import { getConversationForMatch } from "../../src/services/supabase/matches";
@@ -29,6 +30,7 @@ import { VerifiedBadge } from "../../src/components/ui/VerifiedBadge";
  */
 export default function MatchesScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { session } = useAuthSession();
   const userId = session?.user.id ?? null;
   const { matches, loading, error, refresh } = useMatches(userId);
@@ -96,7 +98,7 @@ export default function MatchesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Matches</Text>
+      <Text style={[styles.header, { paddingTop: insets.top + 16 }]}>Matches</Text>
       {error ? (
         <View style={styles.errorBanner}>
           <Text style={styles.errorBannerText}>{error}</Text>
@@ -174,7 +176,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     paddingHorizontal: 20,
-    paddingTop: 16,
     paddingBottom: 8,
   },
   listContent: { paddingBottom: 24 },

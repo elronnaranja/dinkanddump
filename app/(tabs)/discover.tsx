@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthSession } from "../../src/services/supabase/auth";
 import { DEFAULT_DISCOVERY_FILTERS, useDiscoveryQueue } from "../../src/hooks/useDiscoveryQueue";
 import { useProfileMedia } from "../../src/hooks/useProfileMedia";
@@ -249,8 +250,9 @@ export default function DiscoverScreen() {
 
 /** Entry point into app/discovery-preferences.tsx. */
 function DiscoverHeader({ onOpenFilters }: { onOpenFilters: () => void }) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
       <Text style={styles.headerTitle}>Discover</Text>
       <Pressable onPress={onOpenFilters} hitSlop={12} style={styles.filterButton}>
         <Text style={styles.filterButtonText}>Filters</Text>
@@ -266,7 +268,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 16,
     paddingBottom: 4,
   },
   headerTitle: { fontSize: 20, fontWeight: "700" },
