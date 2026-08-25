@@ -9,6 +9,7 @@ import { recordSwipe } from "../../src/services/supabase/swipes";
 import { reportUser } from "../../src/services/supabase/safety";
 import { track } from "../../src/services/analytics/track";
 import { loadDiscoveryFilters } from "../../src/services/discoveryPreferences";
+import { hasSeenSwipeTutorial, markSwipeTutorialSeen } from "../../src/services/swipeTutorial";
 import type { DiscoveryCandidate, DiscoveryFilters } from "../../src/types/domain";
 import { SwipeDeck } from "../../src/components/discovery/SwipeDeck";
 import type { SwipeableCardHandle, SwipeDirection } from "../../src/components/discovery/SwipeableCard";
@@ -16,6 +17,7 @@ import { MoreInfoSheet } from "../../src/components/discovery/MoreInfoSheet";
 import { VideoModal } from "../../src/components/discovery/VideoModal";
 import { EmptyQueueState } from "../../src/components/discovery/EmptyQueueState";
 import { ReportSheet } from "../../src/components/chat/ReportSheet";
+import { SwipeTutorialOverlay } from "../../src/components/discovery/SwipeTutorialOverlay";
 
 function filtersEqual(a: DiscoveryFilters, b: DiscoveryFilters): boolean {
   return (
@@ -97,6 +99,18 @@ export default function DiscoverScreen() {
   const [reportVisible, setReportVisible] = useState(false);
   const [actionPending, setActionPending] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [tutorialVisible, setTutorialVisible] = useState(false);
+
+  useEffect(() => {
+    hasSeenSwipeTutorial().then((seen) => {
+      if (!seen) setTutorialVisible(true);
+    });
+  }, []);
+
+  function dismissTutorial() {
+    setTutorialVisible(false);
+    markSwipeTutorialSeen();
+  }
 
   const cardRef = useRef<SwipeableCardHandle>(null);
 
@@ -245,6 +259,7 @@ export default function DiscoverScreen() {
         onClose={() => setReportVisible(false)}
         onSubmit={submitReport}
       />
+      <SwipeTutorialOverlay visible={tutorialVisible} onDismiss={dismissTutorial} />
     </View>
   );
 }
